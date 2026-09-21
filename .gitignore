@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.local
+database/*.sqlite
+*.log
+node_modules
+dist
+database/*.sqlite-*
+figma-component.js
+outputs/
+work/
+.vercel
+.env*
+!.env.example
+
+.env*
