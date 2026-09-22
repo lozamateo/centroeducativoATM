@@ -1844,3 +1844,227 @@ textarea:focus {
     padding: 20px;
   }
 }
+
+/* Modulos de gestion: Alumnos y Profesores */
+.module-manager {
+  margin-bottom: 24px;
+}
+
+.module-manager h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.module-form {
+  margin-bottom: 18px;
+  padding: 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.module-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.module-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.module-filters input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.module-filters input,
+.module-filters select {
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.data-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+.data-table thead th {
+  background: rgba(219, 234, 254, 0.4);
+  color: var(--blue-900);
+  font-weight: 700;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(219, 234, 254, 0.18);
+}
+
+.data-table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.data-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  cursor: pointer;
+}
+
+.data-table-actions button:hover {
+  background: var(--blue-100);
+  color: var(--blue-900);
+}
+
+.data-table-empty {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 18px;
+}
+
+.estado-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.estado-activo {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+
+.estado-inactivo {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.report-block {
+  padding: 4px 2px 8px;
+}
+
+.report-block h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 12px;
+  color: var(--gray-950);
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: 9px 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.report-card {
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--white), #f8fafc);
+}
+
+.report-card h4 {
+  margin: 0 0 8px;
+  color: var(--blue-900);
+}
+
+.report-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.report-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.report-item button {
+  border: none;
+  background: transparent;
+  color: var(--gray-400);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.report-item button:hover {
+  color: #b91c1c;
+}
+
+.admin-gate {
+  padding: 72px 0;
+}
+
+.internal-header button.text-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+@media (max-width: 860px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

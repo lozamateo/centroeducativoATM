@@ -546,8 +546,12 @@ export async function initializeDatabase() {
 
 async function runMigrations() {
   const columns = [
+    ['alumnos', 'legajo', "TEXT DEFAULT ''"],
     ['alumnos', 'dni', "TEXT DEFAULT ''"],
     ['alumnos', 'fecha_nacimiento', "TEXT DEFAULT ''"],
+    ['alumnos', 'domicilio', "TEXT DEFAULT ''"],
+    ['alumnos', 'telefono', "TEXT DEFAULT ''"],
+    ['alumnos', 'correo_electronico', "TEXT DEFAULT ''"],
     ['alumnos', 'curso', "TEXT DEFAULT ''"],
     ['alumnos', 'division', "TEXT DEFAULT ''"],
     ['alumnos', 'tutor_nombre', "TEXT DEFAULT ''"],
@@ -555,6 +559,7 @@ async function runMigrations() {
     ['alumnos', 'tutor_telefono', "TEXT DEFAULT ''"],
     ['alumnos', 'estado', "TEXT DEFAULT 'activo'"],
     ['alumnos', 'created_at', "TEXT DEFAULT ''"],
+    ['docentes', 'legajo', "TEXT DEFAULT ''"],
     ['docentes', 'dni', "TEXT DEFAULT ''"],
     ['docentes', 'telefono', "TEXT DEFAULT ''"],
     ['docentes', 'estado', "TEXT DEFAULT 'activo'"],
@@ -695,11 +700,11 @@ async function seedDocentes() {
   if (!(await tableIsEmpty('docentes'))) return;
   await insertMany(
     'docentes',
-    ['nombre', 'apellido', 'dni', 'email', 'telefono', 'especialidad', 'estado'],
+    ['legajo', 'nombre', 'apellido', 'dni', 'email', 'telefono', 'especialidad', 'estado'],
     [
-      ['Laura', 'Benitez', '30111222', 'laura.benitez@educar.com', '3624001001', 'Nivel Inicial', 'activo'],
-      ['Martin', 'Aguirre', '28999888', 'martin.aguirre@educar.com', '3624001002', 'Nivel Primario', 'activo'],
-      ['Carolina', 'Molina', '32777444', 'carolina.molina@educar.com', '3624001003', 'Ciencias', 'activo'],
+      ['D-0001', 'Laura', 'Benitez', '30111222', 'laura.benitez@educar.com', '3624001001', 'Nivel Inicial', 'activo'],
+      ['D-0002', 'Martin', 'Aguirre', '28999888', 'martin.aguirre@educar.com', '3624001002', 'Nivel Primario', 'activo'],
+      ['D-0003', 'Carolina', 'Molina', '32777444', 'carolina.molina@educar.com', '3624001003', 'Ciencias', 'activo'],
     ],
   );
 }
@@ -721,11 +726,11 @@ async function seedAlumnos() {
   if (!(await tableIsEmpty('alumnos'))) return;
   await insertMany(
     'alumnos',
-    ['nombre', 'apellido', 'dni', 'fecha_nacimiento', 'nivel', 'curso', 'division', 'tutor_nombre', 'tutor_email', 'tutor_telefono', 'estado'],
+    ['legajo', 'nombre', 'apellido', 'dni', 'fecha_nacimiento', 'domicilio', 'telefono', 'correo_electronico', 'nivel', 'curso', 'division', 'tutor_nombre', 'tutor_email', 'tutor_telefono', 'estado'],
     [
-      ['Sofia', 'Ramirez', '53111222', '2021-08-12', 'Inicial', 'Sala de 5', 'A', 'Mariana Ramirez', 'mariana.demo@educar.com', '3624011001', 'activo'],
-      ['Tomas', 'Pereyra', '50122333', '2016-03-25', 'Primario', '4to', 'A', 'Lucas Pereyra', 'lucas.demo@educar.com', '3624011002', 'activo'],
-      ['Valentina', 'Gomez', '48133444', '2013-10-05', 'Secundario', '1ro', 'A', 'Paula Gomez', 'paula.demo@educar.com', '3624011003', 'activo'],
+      ['A-0001', 'Sofia', 'Ramirez', '53111222', '2021-08-12', 'Av. Sarmiento 1200, Resistencia', '3624021001', 'sofia.ramirez.demo@educar.com', 'Inicial', 'Sala de 5', 'A', 'Mariana Ramirez', 'mariana.demo@educar.com', '3624011001', 'activo'],
+      ['A-0002', 'Tomas', 'Pereyra', '50122333', '2016-03-25', 'Calle Necochea 845, Resistencia', '3624021002', 'tomas.pereyra.demo@educar.com', 'Primario', '4to', 'A', 'Lucas Pereyra', 'lucas.demo@educar.com', '3624011002', 'activo'],
+      ['A-0003', 'Valentina', 'Gomez', '48133444', '2013-10-05', 'Av. Alvear 340, Resistencia', '3624021003', 'valentina.gomez.demo@educar.com', 'Secundario', '1ro', 'A', 'Paula Gomez', 'paula.demo@educar.com', '3624011003', 'activo'],
     ],
   );
 }

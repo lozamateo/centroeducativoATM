@@ -7,10 +7,14 @@ export type Nivel = {
 
 export type Alumno = {
   id: number;
+  legajo: string;
   nombre: string;
   apellido: string;
   dni: string;
   fecha_nacimiento: string;
+  domicilio: string;
+  telefono: string;
+  correo_electronico: string;
   nivel: string;
   curso: string;
   division: string;
@@ -23,6 +27,7 @@ export type Alumno = {
 
 export type Docente = {
   id: number;
+  legajo: string;
   nombre: string;
   apellido: string;
   dni: string;

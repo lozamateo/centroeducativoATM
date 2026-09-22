@@ -177,8 +177,8 @@ app.get('/api/niveles', async (_req, res) => {
 crudRoutes({
   basePath: '/api/alumnos',
   table: 'alumnos',
-  allowedFields: ['nombre', 'apellido', 'dni', 'fecha_nacimiento', 'nivel', 'curso', 'division', 'tutor_nombre', 'tutor_email', 'tutor_telefono', 'estado'],
-  requiredFields: ['nombre', 'apellido', 'nivel'],
+  allowedFields: ['legajo', 'nombre', 'apellido', 'dni', 'fecha_nacimiento', 'domicilio', 'telefono', 'correo_electronico', 'nivel', 'curso', 'division', 'tutor_nombre', 'tutor_email', 'tutor_telefono', 'estado'],
+  requiredFields: ['legajo', 'nombre', 'apellido', 'nivel'],
   orderBy: 'created_at DESC, id DESC',
   softDeleteField: 'estado',
 });
@@ -186,8 +186,8 @@ crudRoutes({
 crudRoutes({
   basePath: '/api/docentes',
   table: 'docentes',
-  allowedFields: ['nombre', 'apellido', 'dni', 'email', 'telefono', 'especialidad', 'estado'],
-  requiredFields: ['nombre', 'apellido', 'email', 'especialidad'],
+  allowedFields: ['legajo', 'nombre', 'apellido', 'dni', 'email', 'telefono', 'especialidad', 'estado'],
+  requiredFields: ['legajo', 'nombre', 'apellido', 'email', 'especialidad'],
   orderBy: 'created_at DESC, id DESC',
   softDeleteField: 'estado',
 });

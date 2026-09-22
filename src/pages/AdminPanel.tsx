@@ -1,10 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowLeft, Database, PlusCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Database, KeyRound, LogOut, PlusCircle, RefreshCw } from 'lucide-react';
 import { Button } from '../components/Button';
+import { AlumnosManager } from '../components/AlumnosManager';
+import { DocentesManager } from '../components/DocentesManager';
 import { api } from '../services/api';
 import type {
   Alumno,
+  AsignacionDocente,
   Curso,
   Docente,
   Instalacion,
@@ -23,6 +26,7 @@ type AdminData = {
   alumnos: Alumno[];
   docentes: Docente[];
   cursos: Curso[];
+  asignaciones: AsignacionDocente[];
   servicios: Servicio[];
   instalaciones: Instalacion[];
   noticias: Noticia[];
@@ -36,17 +40,19 @@ const emptyData: AdminData = {
   alumnos: [],
   docentes: [],
   cursos: [],
+  asignaciones: [],
   servicios: [],
   instalaciones: [],
   noticias: [],
   usuarios: [],
 };
 
+const ADMIN_SESSION_KEY = 'educar_admin_session';
+
 export function AdminPanel() {
+  const [autorizado, setAutorizado] = useState(() => sessionStorage.getItem(ADMIN_SESSION_KEY) === '1');
   const [data, setData] = useState<AdminData>(emptyData);
   const [status, setStatus] = useState('Cargando datos...');
-  const [alumno, setAlumno] = useState({ nombre: '', apellido: '', nivel: 'Inicial', curso: 'Sala de 5', division: 'A' });
-  const [docente, setDocente] = useState({ nombre: '', apellido: '', email: '', especialidad: '' });
   const [curso, setCurso] = useState({ nivel: 'Primario', anio: '', division: 'A', turno: 'Manana', descripcion: '' });
   const [noticia, setNoticia] = useState({ titulo: '', descripcion: '', tipo: 'Institucional' });
   const [servicio, setServicio] = useState({ nombre: '', descripcion: '', tipo: 'general', icono: 'school' });
@@ -55,19 +61,20 @@ export function AdminPanel() {
   async function loadData() {
     setStatus('Cargando datos...');
     try {
-      const [solicitudes, opiniones, postulaciones, alumnos, docentes, cursos, servicios, instalaciones, noticias, usuarios] = await Promise.all([
+      const [solicitudes, opiniones, postulaciones, alumnos, docentes, cursos, asignaciones, servicios, instalaciones, noticias, usuarios] = await Promise.all([
         api.getSolicitudes(),
         api.getOpiniones(true),
         api.getPostulaciones(),
         api.getAlumnos(),
         api.getDocentes(),
         api.getCursos(),
+        api.getAsignaciones(),
         api.getServicios(),
         api.getInstalaciones(),
         api.getNoticias(true),
         api.getUsuarios(),
       ]);
-      setData({ solicitudes, opiniones, postulaciones, alumnos, docentes, cursos, servicios, instalaciones, noticias, usuarios });
+      setData({ solicitudes, opiniones, postulaciones, alumnos, docentes, cursos, asignaciones, servicios, instalaciones, noticias, usuarios });
       setStatus('Datos actualizados.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'No se pudieron cargar los datos.');
@@ -75,8 +82,17 @@ export function AdminPanel() {
   }
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (autorizado) loadData();
+  }, [autorizado]);
+
+  if (!autorizado) {
+    return <AdminGate onAutorizado={() => setAutorizado(true)} />;
+  }
+
+  function cerrarSesion() {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setAutorizado(false);
+  }
 
   async function submitAndReload(event: FormEvent<HTMLFormElement>, action: () => Promise<unknown>, message: string) {
     event.preventDefault();
@@ -90,6 +106,7 @@ export function AdminPanel() {
       <header className="internal-header">
         <a href="/" className="text-button"><ArrowLeft size={17} /> Volver al sitio</a>
         <strong>Panel de gestion</strong>
+        <button type="button" className="text-button" onClick={cerrarSesion}><LogOut size={17} /> Cerrar sesion</button>
       </header>
 
       <main className="admin-shell">
@@ -114,26 +131,12 @@ export function AdminPanel() {
 
         <span className="admin-status">{status}</span>
 
+        <AlumnosManager alumnos={data.alumnos} cursos={data.cursos} onChange={loadData} />
+        <DocentesManager docentes={data.docentes} cursos={data.cursos} asignaciones={data.asignaciones} onChange={loadData} />
+
         <section className="admin-section">
           <h2>Acciones rapidas</h2>
           <div className="quick-forms">
-            <form onSubmit={(event) => submitAndReload(event, () => api.crearAlumno(alumno), 'Creando alumno...')}>
-              <h3><PlusCircle size={17} /> Crear alumno</h3>
-              <input required placeholder="Nombre" value={alumno.nombre} onChange={(event) => setAlumno({ ...alumno, nombre: event.target.value })} />
-              <input required placeholder="Apellido" value={alumno.apellido} onChange={(event) => setAlumno({ ...alumno, apellido: event.target.value })} />
-              <input required placeholder="Nivel" value={alumno.nivel} onChange={(event) => setAlumno({ ...alumno, nivel: event.target.value })} />
-              <Button type="submit">Guardar</Button>
-            </form>
-
-            <form onSubmit={(event) => submitAndReload(event, () => api.crearDocente(docente), 'Creando docente...')}>
-              <h3><PlusCircle size={17} /> Crear docente</h3>
-              <input required placeholder="Nombre" value={docente.nombre} onChange={(event) => setDocente({ ...docente, nombre: event.target.value })} />
-              <input required placeholder="Apellido" value={docente.apellido} onChange={(event) => setDocente({ ...docente, apellido: event.target.value })} />
-              <input required type="email" placeholder="Email" value={docente.email} onChange={(event) => setDocente({ ...docente, email: event.target.value })} />
-              <input required placeholder="Especialidad" value={docente.especialidad} onChange={(event) => setDocente({ ...docente, especialidad: event.target.value })} />
-              <Button type="submit">Guardar</Button>
-            </form>
-
             <form onSubmit={(event) => submitAndReload(event, () => api.crearCurso(curso), 'Creando curso...')}>
               <h3><PlusCircle size={17} /> Crear curso</h3>
               <input required placeholder="Nivel" value={curso.nivel} onChange={(event) => setCurso({ ...curso, nivel: event.target.value })} />
@@ -196,14 +199,6 @@ export function AdminPanel() {
             ))}
           </AdminList>
 
-          <AdminList title="Alumnos">
-            {data.alumnos.map((item) => <AdminItem key={item.id} title={`${item.nombre} ${item.apellido}`} subtitle={`${item.nivel} ${item.curso} ${item.division}`} />)}
-          </AdminList>
-
-          <AdminList title="Docentes">
-            {data.docentes.map((item) => <AdminItem key={item.id} title={`${item.nombre} ${item.apellido}`} subtitle={item.especialidad} />)}
-          </AdminList>
-
           <AdminList title="Cursos">
             {data.cursos.map((item) => <AdminItem key={item.id} title={`${item.nivel} ${item.anio} ${item.division}`} subtitle={item.turno} />)}
           </AdminList>
@@ -224,6 +219,58 @@ export function AdminPanel() {
             {data.usuarios.map((item) => <AdminItem key={item.id} title={item.email} subtitle={`${item.rol} - ${item.estado}`} />)}
           </AdminList>
         </section>
+      </main>
+    </div>
+  );
+}
+
+function AdminGate({ onAutorizado }: { onAutorizado: () => void }) {
+  const [email, setEmail] = useState('admin@educar.com');
+  const [password, setPassword] = useState('admin123');
+  const [status, setStatus] = useState('');
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus('Validando acceso...');
+    try {
+      const response = await api.loginDemo(email, password);
+      if (response.usuario.rol !== 'admin') {
+        setStatus('Este panel es exclusivo para el rol administrador.');
+        return;
+      }
+      sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+      onAutorizado();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'No se pudo validar el acceso.');
+    }
+  }
+
+  return (
+    <div className="internal-page admin-page">
+      <header className="internal-header">
+        <a href="/" className="text-button"><ArrowLeft size={17} /> Volver al sitio</a>
+        <strong>Panel de gestion</strong>
+      </header>
+      <main className="login-layout admin-gate">
+        <section>
+          <span className="eyebrow">Acceso restringido</span>
+          <h1>Panel de administracion</h1>
+          <p>Solo el rol administrador puede gestionar alumnos, profesores y el resto de los modulos.</p>
+        </section>
+        <form className="form-card login-card" onSubmit={handleSubmit}>
+          <KeyRound size={32} />
+          <h2>Iniciar sesion</h2>
+          <label>
+            Email
+            <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+          </label>
+          <label>
+            Password demo
+            <input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+          </label>
+          <Button type="submit">Ingresar</Button>
+          {status && <span className="form-status">{status}</span>}
+        </form>
       </main>
     </div>
   );

@@ -41,6 +41,8 @@ const post = <T, D>(path: string, data: D) =>
 const put = <T, D>(path: string, data: D) =>
   request<T>(path, { method: 'PUT', body: JSON.stringify(data) });
 
+const del = <T>(path: string) => request<T>(path, { method: 'DELETE' });
+
 export const api = {
   getNiveles: () => request<Nivel[]>('/niveles'),
   getServicios: () => request<Servicio[]>('/servicios'),
@@ -66,11 +68,17 @@ export const api = {
     put<PostulacionEmpleo, { estado: string }>(`/postulaciones/${id}/estado`, { estado }),
   getAlumnos: () => request<Alumno[]>('/alumnos'),
   crearAlumno: (data: Partial<Alumno>) => post<Alumno, Partial<Alumno>>('/alumnos', data),
+  actualizarAlumno: (id: number, data: Partial<Alumno>) => put<Alumno, Partial<Alumno>>(`/alumnos/${id}`, data),
+  eliminarAlumno: (id: number) => del<{ ok: boolean }>(`/alumnos/${id}`),
   getDocentes: () => request<Docente[]>('/docentes'),
   crearDocente: (data: Partial<Docente>) => post<Docente, Partial<Docente>>('/docentes', data),
+  actualizarDocente: (id: number, data: Partial<Docente>) => put<Docente, Partial<Docente>>(`/docentes/${id}`, data),
+  eliminarDocente: (id: number) => del<{ ok: boolean }>(`/docentes/${id}`),
   getCursos: () => request<Curso[]>('/cursos'),
   crearCurso: (data: Partial<Curso>) => post<Curso, Partial<Curso>>('/cursos', data),
   getAsignaciones: () => request<AsignacionDocente[]>('/asignaciones-docentes'),
+  crearAsignacion: (data: Partial<AsignacionDocente>) => post<AsignacionDocente, Partial<AsignacionDocente>>('/asignaciones-docentes', data),
+  eliminarAsignacion: (id: number) => del<{ ok: boolean }>(`/asignaciones-docentes/${id}`),
   getActividades: () => request<ActividadEscolar[]>('/actividades'),
   crearActividad: (data: Partial<ActividadEscolar>) => post<ActividadEscolar, Partial<ActividadEscolar>>('/actividades', data),
   getGaleria: () => request<GaleriaImagen[]>('/galeria'),

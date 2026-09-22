@@ -59,6 +59,9 @@ export function LoginDemoPage() {
     setStatus('Validando credenciales demo...');
     try {
       const response = await api.loginDemo(email, password);
+      if (response.usuario.rol === 'admin') {
+        sessionStorage.setItem('educar_admin_session', '1');
+      }
       setUsuario(response.usuario);
       setStatus('');
     } catch (error) {
@@ -130,6 +133,7 @@ export function LoginDemoPage() {
                 variant="outline"
                 type="button"
                 onClick={() => {
+                  sessionStorage.removeItem('educar_admin_session');
                   setUsuario(null);
                   setRoleData({});
                   setStatus('');
