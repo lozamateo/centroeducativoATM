@@ -171,7 +171,7 @@ cd mobile && npx tsc --noEmit # app: tipos
 | Pruebas dinámicas E2E | Cypress (simula a un usuario en el navegador) | `cypress/e2e/` |
 | Pipeline CI | GitHub Actions: lint → pruebas → build → artefactos → SonarCloud → E2E | `.github/workflows/ci.yml` |
 | Análisis de calidad | SonarCloud (requiere el secret `SONAR_TOKEN`) | `sonar-project.properties` |
-| Política de Pull Requests | Plantilla de PR + CODEOWNERS (+ protección de la rama `main` en GitHub) | `.github/` |
+| Política de Pull Requests | Plantilla de PR con checklist de autorrevisión + protección de `main` (CI obligatorio) | `.github/` |
 | Despliegue continuo | Vercel despliega `main` automáticamente; cada PR obtiene una URL de vista previa | `vercel.json` |
 
 ```bash

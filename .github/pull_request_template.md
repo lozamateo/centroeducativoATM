@@ -15,5 +15,5 @@ Issue relacionada: #
 
 - [ ] La rama sale de `main` y tiene un nombre descriptivo (`feature/...`, `fix/...`)
 - [ ] El pipeline de CI pasa (lint, pruebas, build, E2E)
-- [ ] Al menos una revisión aprobada de otro integrante
+- [ ] Autorrevisión del diff completo (equipo unipersonal: GitHub no permite aprobar un PR propio)
 - [ ] No se suben secretos ni archivos `.env`
