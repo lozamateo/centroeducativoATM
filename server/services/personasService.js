@@ -154,12 +154,12 @@ const tablaPorRol = { ALUMNO: 'alumnos', TUTOR: 'tutores', DOCENTE: 'profesores'
 export async function crearUsuario(usuarioId, body) {
   requireFields(body, ['email', 'password', 'nombre', 'apellido', 'rol']);
   checkEmail(body.email);
-  if (String(body.password).length < 6) throw badRequest('La contrasena debe tener al menos 6 caracteres.');
+  if (String(body.password).length < 6) throw badRequest('La contraseña debe tener al menos 6 caracteres.');
 
   const hash = await hashPassword(body.password);
   return transaction(usuarioId, async (tx) => {
     const rol = await tx.queryOne('select id from roles where codigo = $1', [body.rol]);
-    if (!rol) throw badRequest('Rol invalido.');
+    if (!rol) throw badRequest('Rol inválido.');
 
     const usuario = await tx.queryOne(
       `insert into usuarios (email, password_hash, nombre, apellido, rol_id)
@@ -185,7 +185,7 @@ export async function actualizarUsuario(usuarioId, id, body) {
     let rolId = null;
     if (body.rol) {
       const rol = await tx.queryOne('select id from roles where codigo = $1', [body.rol]);
-      if (!rol) throw badRequest('Rol invalido.');
+      if (!rol) throw badRequest('Rol inválido.');
       rolId = rol.id;
     }
     const hash = body.password ? await hashPassword(body.password) : null;

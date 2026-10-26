@@ -22,7 +22,7 @@ app.use('/api', (_req, res) => res.status(404).json({ error: 'Ruta no encontrada
 
 app.use((error, _req, res, _next) => {
   if (error.type === 'entity.parse.failed') {
-    return res.status(400).json({ error: 'El cuerpo de la solicitud no es JSON valido.' });
+    return res.status(400).json({ error: 'El cuerpo de la solicitud no es JSON válido.' });
   }
   const httpError = toHttpError(error);
   res.status(httpError.status).json({ error: httpError.message });

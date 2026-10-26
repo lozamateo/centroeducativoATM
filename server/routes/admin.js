@@ -6,6 +6,7 @@ import * as contenido from '../services/contenidoService.js';
 import * as deportes from '../services/deportesService.js';
 import * as inscripciones from '../services/inscripcionService.js';
 import * as personas from '../services/personasService.js';
+import * as portal from '../services/portalService.js';
 import * as reportes from '../services/reporteEngineService.js';
 import { clean, toId } from '../validation.js';
 
@@ -111,6 +112,8 @@ router.get('/inscripciones-deporte', async (req, res) =>
     }),
   ),
 );
+router.get('/alumnos/:id/detalle', async (req, res) => res.json(await portal.detalleAlumno(id(req))));
+router.get('/alumnos/:id/opciones', async (req, res) => res.json(await portal.opcionesInscripcion(id(req))));
 router.get('/alumnos/:id/comisiones', async (req, res) => res.json(await inscripciones.comisionesDisponibles(id(req))));
 router.post('/inscripciones-deporte', async (req, res) =>
   res.status(201).json(await inscripciones.inscribirDeporte(uid(req), toId(req.body.alumno_id, 'alumno_id'), req.body.comision_id)),

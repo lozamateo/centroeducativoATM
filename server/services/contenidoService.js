@@ -68,7 +68,7 @@ export async function enviarSolicitud(body) {
       body.nivel_id, body.anio_solicitado || null, body.servicios ?? null, body.comentarios || null,
     ],
   );
-  return { mensaje: 'Recibimos tu solicitud. Secretaria se comunicara para completar la matricula.' };
+  return { mensaje: 'Recibimos tu solicitud. Secretaría se comunicará para completar la matrícula.' };
 }
 
 export function listarSolicitudes() {
@@ -79,7 +79,7 @@ export function listarSolicitudes() {
 }
 
 export async function cambiarEstadoSolicitud(id, estado) {
-  if (!['Pendiente', 'Contactada', 'Aceptada', 'Rechazada'].includes(estado)) throw badRequest('Estado invalido.');
+  if (!['Pendiente', 'Contactada', 'Aceptada', 'Rechazada'].includes(estado)) throw badRequest('Estado inválido.');
   const row = await queryOne('update solicitudes_inscripcion set estado = $2 where id = $1 returning *', [id, estado]);
   if (!row) throw notFound('Solicitud no encontrada.');
   return row;

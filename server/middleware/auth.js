@@ -25,7 +25,7 @@ export function authenticate(req, _res, next) {
   const [scheme, token] = header.split(' ');
 
   if (scheme !== 'Bearer' || !token) {
-    return next(new HttpError(401, 'Debe iniciar sesion.'));
+    return next(new HttpError(401, 'Debe iniciar sesión.'));
   }
 
   try {
@@ -33,7 +33,7 @@ export function authenticate(req, _res, next) {
     req.usuario = { id: Number(payload.sub), rol: payload.rol, nombre: payload.nombre };
     next();
   } catch {
-    next(new HttpError(401, 'La sesion expiro o no es valida. Inicie sesion nuevamente.'));
+    next(new HttpError(401, 'La sesión expiró o no es válida. Inicie sesión nuevamente.'));
   }
 }
 

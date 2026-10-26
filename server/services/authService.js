@@ -20,7 +20,7 @@ export async function login(email, password) {
   const usuario = await queryOne(`${perfilSql} where lower(u.email) = lower($1)`, [email]);
   const valido = usuario && usuario.activo && (await bcrypt.compare(password, usuario.password_hash));
 
-  if (!valido) throw new HttpError(401, 'Email o contrasena incorrectos.');
+  if (!valido) throw new HttpError(401, 'Email o contraseña incorrectos.');
 
   await query('update usuarios set ultimo_acceso = now() where id = $1', [usuario.id]);
   const permisos = await permisosDeRol(usuario.rol);

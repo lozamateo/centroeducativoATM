@@ -44,9 +44,9 @@ export function listarComisiones({ deporte_id, nivel_id } = {}) {
 }
 
 function validarHorarios(horarios) {
-  if (!Array.isArray(horarios) || !horarios.length) throw badRequest('La comision debe tener al menos un horario.');
+  if (!Array.isArray(horarios) || !horarios.length) throw badRequest('La comisión debe tener al menos un horario.');
   for (const h of horarios) {
-    if (!(h.dia_semana >= 1 && h.dia_semana <= 6)) throw badRequest('El dia debe ser de lunes (1) a sabado (6).');
+    if (!(h.dia_semana >= 1 && h.dia_semana <= 6)) throw badRequest('El día debe ser de lunes (1) a sábado (6).');
     if (!h.hora_inicio || !h.hora_fin || h.hora_fin <= h.hora_inicio) {
       throw badRequest('Cada horario debe tener hora de inicio menor a la de fin.');
     }
@@ -83,7 +83,7 @@ export async function actualizarComision(usuarioId, id, body) {
        where id = $1 returning *`,
       [id, body.nombre || null, body.profesor_id || null, body.cupo || null],
     );
-    if (!comision) throw notFound('Comision no encontrada.');
+    if (!comision) throw notFound('Comisión no encontrada.');
     if (body.horarios) {
       await tx.query('delete from horarios where comision_id = $1', [id]);
       for (const h of body.horarios) {
@@ -101,5 +101,5 @@ export async function actualizarComision(usuarioId, id, body) {
 
 export async function eliminarComision(id) {
   const row = await queryOne('delete from comisiones where id = $1 returning id', [id]);
-  if (!row) throw notFound('Comision no encontrada.');
+  if (!row) throw notFound('Comisión no encontrada.');
 }

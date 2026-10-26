@@ -11,7 +11,7 @@ export async function verificarHijo(usuarioId, alumnoId) {
      where t.usuario_id = $1 and at.alumno_id = $2`,
     [usuarioId, alumnoId],
   );
-  if (!row) throw forbidden('El alumno no esta vinculado a su cuenta.');
+  if (!row) throw forbidden('El alumno no está vinculado a su cuenta.');
 }
 
 export function hijos(usuarioId) {
@@ -89,7 +89,7 @@ export async function opcionesInscripcion(alumnoId) {
 
 export async function docente(usuarioId) {
   const profesor = await queryOne('select * from profesores where usuario_id = $1', [usuarioId]);
-  if (!profesor) throw notFound('El usuario no esta vinculado a un legajo docente.');
+  if (!profesor) throw notFound('El usuario no está vinculado a un legajo docente.');
 
   const [materias, comisiones] = await Promise.all([
     query(
@@ -127,6 +127,6 @@ export async function docente(usuarioId) {
 
 export async function alumnoPropio(usuarioId) {
   const alumno = await queryOne('select id from alumnos where usuario_id = $1', [usuarioId]);
-  if (!alumno) throw notFound('El usuario no esta vinculado a un legajo de alumno.');
+  if (!alumno) throw notFound('El usuario no está vinculado a un legajo de alumno.');
   return detalleAlumno(alumno.id);
 }

@@ -19,7 +19,7 @@ export function pick(body, fields) {
 }
 
 export function checkEmail(value, field = 'email') {
-  if (value && !emailRegex.test(value)) throw badRequest(`El campo ${field} no es un email valido.`);
+  if (value && !emailRegex.test(value)) throw badRequest(`El campo ${field} no es un email válido.`);
 }
 
 export function checkDate(value, field) {
@@ -27,11 +27,11 @@ export function checkDate(value, field) {
 }
 
 export function checkDni(value) {
-  if (value && !/^\d{7,9}$/.test(String(value))) throw badRequest('El DNI debe tener entre 7 y 9 numeros.');
+  if (value && !/^\d{7,9}$/.test(String(value))) throw badRequest('El DNI debe tener entre 7 y 9 números.');
 }
 
 export function toId(value, field = 'id') {
   const id = Number(value);
-  if (!Number.isInteger(id) || id <= 0) throw badRequest(`El campo ${field} es invalido.`);
+  if (!Number.isInteger(id) || id <= 0) throw badRequest(`El campo ${field} es inválido.`);
   return id;
 }

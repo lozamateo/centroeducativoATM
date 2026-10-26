@@ -180,7 +180,7 @@ create table cursos (
   anio        text        not null,
   division    text        not null,
   turno       text        not null default 'Jornada extendida'
-                check (turno in ('Manana', 'Tarde', 'Jornada extendida')),
+                check (turno in ('Mañana', 'Tarde', 'Jornada extendida')),
   cupo        smallint    not null default 30 check (cupo > 0),
   created_at  timestamptz not null default now(),
   unique (nivel_id, ciclo_id, anio, division)
@@ -414,12 +414,12 @@ begin
   select nivel_id into v_nivel from alumnos where id = new.alumno_id for update;
 
   if v_nivel is distinct from v_comision.nivel_id then
-    raise exception 'La comision no corresponde al nivel educativo del alumno.' using errcode = 'P0001';
+    raise exception 'La comisión no corresponde al nivel educativo del alumno.' using errcode = 'P0001';
   end if;
 
   select apto_fisico_vence into v_vence from fichas_medicas where alumno_id = new.alumno_id;
   if v_vence is null or v_vence < current_date then
-    raise exception 'El alumno no tiene apto fisico vigente. Debe actualizarlo en enfermeria.' using errcode = 'P0001';
+    raise exception 'El alumno no tiene apto físico vigente. Debe actualizarlo en enfermería.' using errcode = 'P0001';
   end if;
 
   if exists (
@@ -439,7 +439,7 @@ begin
     and c.ciclo_id = v_comision.ciclo_id;
 
   if v_activas >= 2 then
-    raise exception 'El alumno ya tiene 2 deportes activos (maximo permitido).' using errcode = 'P0001';
+    raise exception 'El alumno ya tiene 2 deportes activos (máximo permitido).' using errcode = 'P0001';
   end if;
 
   select d.nombre into v_choque
@@ -463,7 +463,7 @@ begin
   where comision_id = new.comision_id and activa and id is distinct from new.id;
 
   if v_ocupados >= v_comision.cupo then
-    raise exception 'La comision no tiene cupo disponible.' using errcode = 'P0001';
+    raise exception 'La comisión no tiene cupo disponible.' using errcode = 'P0001';
   end if;
 
   return new;
@@ -653,23 +653,23 @@ $$;
 -- =====================================================================
 
 insert into roles (codigo, nombre, descripcion) values
-  ('ADMIN',      'Administrador', 'Direccion y secretaria: acceso total'),
+  ('ADMIN',      'Administrador', 'Dirección y secretaría: acceso total'),
   ('DOCENTE',    'Docente',       'Profesores: cursos, materias y comisiones a cargo'),
-  ('TUTOR',      'Tutor',         'Familias: autogestion de sus hijos'),
-  ('ALUMNO',     'Alumno',        'Consulta de su informacion'),
-  ('ENFERMERIA', 'Enfermeria',    'Ficha medica y apto fisico');
+  ('TUTOR',      'Tutor',         'Familias: autogestión de sus hijos'),
+  ('ALUMNO',     'Alumno',        'Consulta de su información'),
+  ('ENFERMERIA', 'Enfermería',    'Ficha médica y apto físico');
 
 insert into permisos (codigo, descripcion) values
-  ('usuarios.gestionar',     'Alta, baja y modificacion de usuarios'),
+  ('usuarios.gestionar',     'Alta, baja y modificación de usuarios'),
   ('academico.gestionar',    'Niveles, cursos, materias y docentes'),
   ('alumnos.gestionar',      'Legajos de alumnos y vinculo familiar'),
   ('matriculas.gestionar',   'Matricular alumnos'),
   ('deportes.gestionar',     'Deportes, comisiones y horarios'),
   ('servicios.gestionar',    'Transporte y comedor'),
   ('reportes.ver',           'Reportes gerenciales MIS'),
-  ('salud.gestionar',        'Ficha medica y apto fisico'),
-  ('portal.familia',         'Autogestion de la familia'),
-  ('portal.docente',         'Autogestion del docente'),
+  ('salud.gestionar',        'Ficha médica y apto físico'),
+  ('portal.familia',         'Autogestión de la familia'),
+  ('portal.docente',         'Autogestión del docente'),
   ('portal.alumno',          'Consulta del alumno'),
   ('contenido.gestionar',    'Noticias y mensajes del sitio');
 
@@ -684,22 +684,22 @@ join permisos p on
   or r.codigo = 'ENFERMERIA' and p.codigo in ('salud.gestionar');
 
 insert into niveles_educativos (nombre, descripcion, edad_desde, edad_hasta) values
-  ('Inicial',    'Salas de 3, 4 y 5 anos con jornada extendida y juego en ingles.', 3, 5),
-  ('Primario',   'De 1.o a 6.o grado con formacion plurilingue y deporte diario.', 6, 11),
-  ('Secundario', 'De 1.o a 6.o ano con orientacion en ciencias, idiomas y tecnologia.', 12, 17);
+  ('Inicial',    'Salas de 3, 4 y 5 años con jornada extendida y juego en inglés.', 3, 5),
+  ('Primario',   'De 1.º a 6.º grado con formación plurilingüe y deporte diario.', 6, 11),
+  ('Secundario', 'De 1.º a 6.º año con orientación en ciencias, idiomas y tecnología.', 12, 17);
 
 insert into ciclos_lectivos (anio, fecha_inicio, fecha_fin, activo) values
   (2027, '2027-03-01', '2027-12-15', true);
 
--- Cursos: Inicial (salas), Primario (1.o a 6.o) y Secundario (1.o a 6.o), division A.
+-- Cursos: Inicial (salas), Primario (1.º a 6.º) y Secundario (1.º a 6.º), división A.
 insert into cursos (nivel_id, ciclo_id, anio, division, cupo)
 select n.id, c.id, x.anio, 'A', 25
 from (values
   ('Inicial', 'Sala de 3'), ('Inicial', 'Sala de 4'), ('Inicial', 'Sala de 5'),
-  ('Primario', '1.o grado'), ('Primario', '2.o grado'), ('Primario', '3.o grado'),
-  ('Primario', '4.o grado'), ('Primario', '5.o grado'), ('Primario', '6.o grado'),
-  ('Secundario', '1.o ano'), ('Secundario', '2.o ano'), ('Secundario', '3.o ano'),
-  ('Secundario', '4.o ano'), ('Secundario', '5.o ano'), ('Secundario', '6.o ano')
+  ('Primario', '1.º grado'), ('Primario', '2.º grado'), ('Primario', '3.º grado'),
+  ('Primario', '4.º grado'), ('Primario', '5.º grado'), ('Primario', '6.º grado'),
+  ('Secundario', '1.º año'), ('Secundario', '2.º año'), ('Secundario', '3.º año'),
+  ('Secundario', '4.º año'), ('Secundario', '5.º año'), ('Secundario', '6.º año')
 ) as x (nivel, anio)
 join niveles_educativos n on n.nombre = x.nivel
 cross join ciclos_lectivos c
@@ -709,23 +709,23 @@ insert into materias (nombre, nivel_id, es_idioma, carga_horaria_semanal)
 select x.nombre, n.id, x.idioma, x.horas
 from (values
   ('Inicial',    'Juego y expresion',       false, 10),
-  ('Inicial',    'Ingles',                  true,   5),
-  ('Inicial',    'Educacion fisica',        false,  3),
-  ('Primario',   'Practicas del lenguaje',  false,  6),
-  ('Primario',   'Matematica',              false,  6),
+  ('Inicial',    'Inglés',                  true,   5),
+  ('Inicial',    'Educación física',        false,  3),
+  ('Primario',   'Prácticas del lenguaje',  false,  6),
+  ('Primario',   'Matemática',              false,  6),
   ('Primario',   'Ciencias naturales',      false,  3),
   ('Primario',   'Ciencias sociales',       false,  3),
-  ('Primario',   'Ingles',                  true,   5),
-  ('Primario',   'Portugues',               true,   2),
-  ('Primario',   'Educacion fisica',        false,  3),
+  ('Primario',   'Inglés',                  true,   5),
+  ('Primario',   'Portugués',               true,   2),
+  ('Primario',   'Educación física',        false,  3),
   ('Secundario', 'Lengua y literatura',     false,  5),
-  ('Secundario', 'Matematica',              false,  5),
-  ('Secundario', 'Biologia',                false,  3),
+  ('Secundario', 'Matemática',              false,  5),
+  ('Secundario', 'Biología',                false,  3),
   ('Secundario', 'Historia',                false,  3),
-  ('Secundario', 'Ingles',                  true,   4),
-  ('Secundario', 'Portugues',               true,   3),
-  ('Secundario', 'Tecnologia',              false,  3),
-  ('Secundario', 'Educacion fisica',        false,  3)
+  ('Secundario', 'Inglés',                  true,   4),
+  ('Secundario', 'Portugués',               true,   3),
+  ('Secundario', 'Tecnología',              false,  3),
+  ('Secundario', 'Educación física',        false,  3)
 ) as x (nivel, nombre, idioma, horas)
 join niveles_educativos n on n.nombre = x.nivel;
 
@@ -737,29 +737,29 @@ join materias m on m.nivel_id = c.nivel_id;
 
 insert into recorridos_transporte (id, nombre, zona, paradas, horario_ida, horario_vuelta, capacidad) values
   (1, 'Recorrido 1 - Norte', 'Barrio Villa Prosperidad / Av. Alvear',      'Plaza 25 de Mayo, Av. Alvear 1500, Villa Prosperidad', '07:00', '17:30', 40),
-  (2, 'Recorrido 2 - Sur',   'Barranqueras / Av. San Martin',             'Av. San Martin 2000, Barranqueras centro',              '07:00', '17:30', 40),
+  (2, 'Recorrido 2 - Sur',   'Barranqueras / Av. San Martín',             'Av. San Martín 2000, Barranqueras centro',              '07:00', '17:30', 40),
   (3, 'Recorrido 3 - Este',  'Centro / Av. 25 de Mayo',                   'Casa de Gobierno, Av. 25 de Mayo 1200, Parque 2 de Febrero', '07:10', '17:40', 40),
   (4, 'Recorrido 4 - Oeste', 'Villa Libertad / Av. Sarmiento',            'Av. Sarmiento 3000, Villa Libertad, Rotonda Ruta 11',   '07:10', '17:40', 40);
 
 insert into deportes (nombre, descripcion) values
-  ('Futbol',     'Futbol infantil y juvenil, mixto por categorias.'),
+  ('Fútbol',     'Fútbol infantil y juvenil, mixto por categorías.'),
   ('Hockey',     'Hockey sobre cesped.'),
-  ('Natacion',   'Natacion en el natatorio climatizado del centro.'),
-  ('Basquet',    'Minibasquet y basquet juvenil.'),
-  ('Voley',      'Voley para Primario y Secundario.'),
+  ('Natación',   'Natación en el natatorio climatizado del centro.'),
+  ('Básquet',    'Minibásquet y básquet juvenil.'),
+  ('Vóley',      'Vóley para Primario y Secundario.'),
   ('Atletismo',  'Pista y campo.');
 
 -- Comisiones de ejemplo con sus horarios (dia 1 = lunes).
 insert into comisiones (deporte_id, nivel_id, ciclo_id, nombre, cupo)
 select d.id, n.id, c.id, x.comision, x.cupo
 from (values
-  ('Futbol',    'Primario',   'Primario A',   22),
-  ('Natacion',  'Primario',   'Primario A',   15),
+  ('Fútbol',    'Primario',   'Primario A',   22),
+  ('Natación',  'Primario',   'Primario A',   15),
   ('Hockey',    'Primario',   'Primario A',   20),
-  ('Basquet',   'Primario',   'Primario A',   20),
-  ('Futbol',    'Secundario', 'Secundario A', 22),
-  ('Voley',     'Secundario', 'Secundario A', 18),
-  ('Natacion',  'Secundario', 'Secundario A', 15),
+  ('Básquet',   'Primario',   'Primario A',   20),
+  ('Fútbol',    'Secundario', 'Secundario A', 22),
+  ('Vóley',     'Secundario', 'Secundario A', 18),
+  ('Natación',  'Secundario', 'Secundario A', 15),
   ('Atletismo', 'Secundario', 'Secundario A', 25)
 ) as x (deporte, nivel, comision, cupo)
 join deportes d           on d.nombre = x.deporte
@@ -770,18 +770,18 @@ where c.anio = 2027;
 insert into horarios (comision_id, dia_semana, hora_inicio, hora_fin)
 select co.id, x.dia, x.inicio::time, x.fin::time
 from (values
-  ('Futbol',    'Primario A',   1, '16:00', '17:00'),
-  ('Futbol',    'Primario A',   3, '16:00', '17:00'),
-  ('Natacion',  'Primario A',   1, '16:30', '17:30'),
-  ('Natacion',  'Primario A',   4, '16:00', '17:00'),
+  ('Fútbol',    'Primario A',   1, '16:00', '17:00'),
+  ('Fútbol',    'Primario A',   3, '16:00', '17:00'),
+  ('Natación',  'Primario A',   1, '16:30', '17:30'),
+  ('Natación',  'Primario A',   4, '16:00', '17:00'),
   ('Hockey',    'Primario A',   2, '16:00', '17:00'),
   ('Hockey',    'Primario A',   4, '16:00', '17:00'),
-  ('Basquet',   'Primario A',   5, '16:00', '17:30'),
-  ('Futbol',    'Secundario A', 2, '17:00', '18:30'),
-  ('Futbol',    'Secundario A', 4, '17:00', '18:30'),
-  ('Voley',     'Secundario A', 1, '17:00', '18:30'),
-  ('Voley',     'Secundario A', 3, '17:00', '18:30'),
-  ('Natacion',  'Secundario A', 2, '17:30', '18:30'),
+  ('Básquet',   'Primario A',   5, '16:00', '17:30'),
+  ('Fútbol',    'Secundario A', 2, '17:00', '18:30'),
+  ('Fútbol',    'Secundario A', 4, '17:00', '18:30'),
+  ('Vóley',     'Secundario A', 1, '17:00', '18:30'),
+  ('Vóley',     'Secundario A', 3, '17:00', '18:30'),
+  ('Natación',  'Secundario A', 2, '17:30', '18:30'),
   ('Atletismo', 'Secundario A', 5, '16:30', '18:00')
 ) as x (deporte, comision, dia, inicio, fin)
 join deportes d    on d.nombre = x.deporte
@@ -791,33 +791,33 @@ join comisiones co on co.deporte_id = d.id and co.nombre = x.comision;
 insert into usuarios (email, password_hash, nombre, apellido, rol_id)
 select x.email, extensions.crypt(x.clave, extensions.gen_salt('bf', 10)), x.nombre, x.apellido, r.id
 from (values
-  ('admin@educar.com',      'admin123',      'Laura',   'Gimenez',  'ADMIN'),
-  ('docente@educar.com',    'docente123',    'Martin',  'Acosta',   'DOCENTE'),
-  ('tutor@educar.com',      'tutor123',      'Carolina','Benitez',  'TUTOR'),
-  ('alumno@educar.com',     'alumno123',     'Tomas',   'Benitez',  'ALUMNO'),
+  ('admin@educar.com',      'admin123',      'Laura',   'Giménez',  'ADMIN'),
+  ('docente@educar.com',    'docente123',    'Martín',  'Acosta',   'DOCENTE'),
+  ('tutor@educar.com',      'tutor123',      'Carolina','Benítez',  'TUTOR'),
+  ('alumno@educar.com',     'alumno123',     'Tomás',   'Benítez',  'ALUMNO'),
   ('enfermeria@educar.com', 'enfermeria123', 'Silvia',  'Romero',   'ENFERMERIA')
 ) as x (email, clave, nombre, apellido, rol)
 join roles r on r.codigo = x.rol;
 
 insert into profesores (usuario_id, dni, nombre, apellido, email, telefono, especialidad, fecha_ingreso)
 values
-  ((select id from usuarios where email = 'docente@educar.com'), '28111222', 'Martin', 'Acosta', 'docente@educar.com', '3624-401122', 'Educacion fisica', '2027-02-01'),
-  (null, '30222333', 'Paula',  'Fernandez', 'pfernandez@educar.com', '3624-402233', 'Ingles',     '2027-02-01'),
-  (null, '27333444', 'Diego',  'Ramirez',   'dramirez@educar.com',   '3624-403344', 'Matematica', '2027-02-01');
+  ((select id from usuarios where email = 'docente@educar.com'), '28111222', 'Martín', 'Acosta', 'docente@educar.com', '3624-401122', 'Educación física', '2027-02-01'),
+  (null, '30222333', 'Paula',  'Fernández', 'pfernandez@educar.com', '3624-402233', 'Inglés',     '2027-02-01'),
+  (null, '27333444', 'Diego',  'Ramírez',   'dramirez@educar.com',   '3624-403344', 'Matemática', '2027-02-01');
 
 update comisiones set profesor_id = (select id from profesores where dni = '28111222');
 
 insert into tutores (usuario_id, dni, nombre, apellido, email, telefono, direccion, ocupacion)
 values
-  ((select id from usuarios where email = 'tutor@educar.com'), '25444555', 'Carolina', 'Benitez', 'tutor@educar.com', '3624-555001', 'Av. Alvear 1450, Resistencia', 'Contadora'),
-  (null, '26555666', 'Javier', 'Lopez', 'jlopez@mail.com', '3624-555002', 'Av. Sarmiento 2900, Resistencia', 'Comerciante');
+  ((select id from usuarios where email = 'tutor@educar.com'), '25444555', 'Carolina', 'Benítez', 'tutor@educar.com', '3624-555001', 'Av. Alvear 1450, Resistencia', 'Contadora'),
+  (null, '26555666', 'Javier', 'López', 'jlopez@mail.com', '3624-555002', 'Av. Sarmiento 2900, Resistencia', 'Comerciante');
 
 insert into alumnos (usuario_id, dni, nombre, apellido, fecha_nacimiento, genero, direccion, nivel_id)
 select u.id, x.dni, x.nombre, x.apellido, x.nac::date, x.genero, x.dir, n.id
 from (values
-  ('alumno@educar.com', '50111222', 'Tomas',  'Benitez', '2015-04-12', 'Masculino', 'Av. Alvear 1450, Resistencia',   'Primario'),
-  (null,                '52111333', 'Sofia',  'Benitez', '2018-09-03', 'Femenino',  'Av. Alvear 1450, Resistencia',   'Primario'),
-  (null,                '48111444', 'Lucas',  'Lopez',   '2013-01-20', 'Masculino', 'Av. Sarmiento 2900, Resistencia', 'Secundario')
+  ('alumno@educar.com', '50111222', 'Tomás',  'Benítez', '2015-04-12', 'Masculino', 'Av. Alvear 1450, Resistencia',   'Primario'),
+  (null,                '52111333', 'Sofía',  'Benítez', '2018-09-03', 'Femenino',  'Av. Alvear 1450, Resistencia',   'Primario'),
+  (null,                '48111444', 'Lucas',  'López',   '2013-01-20', 'Masculino', 'Av. Sarmiento 2900, Resistencia', 'Secundario')
 ) as x (email, dni, nombre, apellido, nac, genero, dir, nivel)
 join niveles_educativos n on n.nombre = x.nivel
 left join usuarios u on u.email = x.email;
@@ -835,9 +835,9 @@ join tutores t on t.dni = x.tutor;
 insert into matriculas (alumno_id, curso_id, ciclo_id)
 select a.id, c.id, c.ciclo_id
 from (values
-  ('50111222', '6.o grado'),
-  ('52111333', '3.o grado'),
-  ('48111444', '2.o ano')
+  ('50111222', '6.º grado'),
+  ('52111333', '3.º grado'),
+  ('48111444', '2.º año')
 ) as x (alumno, anio)
 join alumnos a on a.dni = x.alumno
 join cursos c  on c.anio = x.anio and c.division = 'A';
@@ -845,9 +845,9 @@ join cursos c  on c.anio = x.anio and c.division = 'A';
 insert into fichas_medicas (alumno_id, grupo_sanguineo, alergias, obra_social, contacto_emergencia, telefono_emergencia, apto_fisico_emision, apto_fisico_vence)
 select a.id, x.grupo, x.alergias, x.os, x.contacto, x.tel, x.emision::date, x.vence::date
 from (values
-  ('50111222', 'A+', 'Ninguna',    'OSDE',     'Carolina Benitez', '3624-555001', '2027-02-10', '2028-02-10'),
-  ('52111333', '0+', 'Penicilina', 'OSDE',     'Carolina Benitez', '3624-555001', '2025-02-10', '2026-02-10'),
-  ('48111444', 'B+', 'Ninguna',    'Swiss Medical', 'Javier Lopez', '3624-555002', '2027-02-15', '2028-02-15')
+  ('50111222', 'A+', 'Ninguna',    'OSDE',     'Carolina Benítez', '3624-555001', '2027-02-10', '2028-02-10'),
+  ('52111333', '0+', 'Penicilina', 'OSDE',     'Carolina Benítez', '3624-555001', '2025-02-10', '2026-02-10'),
+  ('48111444', 'B+', 'Ninguna',    'Swiss Medical', 'Javier López', '3624-555002', '2027-02-15', '2028-02-15')
 ) as x (alumno, grupo, alergias, os, contacto, tel, emision, vence)
 join alumnos a on a.dni = x.alumno;
 
@@ -867,12 +867,12 @@ from alumnos a cross join ciclos_lectivos c
 where c.anio = 2027 and a.dni in ('50111222', '52111333');
 
 insert into noticias (titulo, resumen, categoria) values
-  ('Abrimos la pre-inscripcion 2027',
+  ('Abrimos la pre-inscripción 2027',
    'Las familias ya pueden completar la solicitud online para Inicial, Primario y Secundario.',
    'Inscripciones'),
   ('Jornada de puertas abiertas',
-   'Recorre las instalaciones, conoce al equipo docente y la propuesta plurilingue.',
+   'Recorre las instalaciones, conoce al equipo docente y la propuesta plurilingüe.',
    'Institucional'),
-  ('Deportes propios desde el primer ano',
-   'Futbol, hockey, natacion, basquet, voley y atletismo dentro del predio.',
+  ('Deportes propios desde el primer año',
+   'Fútbol, hockey, natación, básquet, vóley y atletismo dentro del predio.',
    'Deportes');

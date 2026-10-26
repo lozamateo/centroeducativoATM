@@ -36,7 +36,7 @@ export async function matricular(usuarioId, alumnoId, cursoId) {
       "select id from matriculas where alumno_id = $1 and ciclo_id = $2 and estado <> 'Baja'",
       [alumnoId, curso.ciclo_id],
     );
-    if (previa) throw badRequest('El alumno ya tiene una matricula en este ciclo lectivo.');
+    if (previa) throw badRequest('El alumno ya tiene una matrícula en este ciclo lectivo.');
 
     return tx.queryOne(
       `insert into matriculas (alumno_id, curso_id, ciclo_id, registrado_por)
@@ -50,7 +50,7 @@ export async function bajaMatricula(usuarioId, id) {
   const row = await transaction(usuarioId, (tx) =>
     tx.queryOne("update matriculas set estado = 'Baja' where id = $1 and estado <> 'Baja' returning *", [id]),
   );
-  if (!row) throw notFound('Matricula no encontrada o ya dada de baja.');
+  if (!row) throw notFound('Matrícula no encontrada o ya dada de baja.');
   return row;
 }
 
@@ -88,7 +88,7 @@ export async function bajaDeporte(usuarioId, id, alumnoId) {
       [id, alumnoId ?? null],
     ),
   );
-  if (!row) throw notFound('Inscripcion no encontrada.');
+  if (!row) throw notFound('Inscripción no encontrada.');
   return row;
 }
 
@@ -131,9 +131,9 @@ export async function comisionesDisponibles(alumnoId) {
   return comisiones.map((comision) => {
     let motivo = null;
     if (actuales.some((row) => row.comision_id === comision.id)) motivo = 'Ya inscripto';
-    else if (!aptoVigente) motivo = 'Apto fisico vencido o ausente';
+    else if (!aptoVigente) motivo = 'Apto físico vencido o ausente';
     else if (actuales.some((row) => row.deporte_id === comision.deporte_id)) motivo = 'Ya inscripto en este deporte';
-    else if (cantidadActual >= 2) motivo = 'Maximo de 2 deportes alcanzado';
+    else if (cantidadActual >= 2) motivo = 'Máximo de 2 deportes alcanzado';
     else if (comision.inscriptos >= comision.cupo) motivo = 'Sin cupo';
     else if (
       comision.horarios.some((h) =>
@@ -176,7 +176,7 @@ export async function bajaTransporte(usuarioId, id, alumnoId) {
       [id, alumnoId ?? null],
     ),
   );
-  if (!row) throw notFound('Inscripcion de transporte no encontrada.');
+  if (!row) throw notFound('Inscripción de transporte no encontrada.');
   return row;
 }
 
@@ -184,7 +184,7 @@ export async function bajaTransporte(usuarioId, id, alumnoId) {
 
 export async function inscribirComedor(usuarioId, alumnoId, { modalidad, dias, dieta_especial }) {
   if (dias && (!Array.isArray(dias) || !dias.every((dia) => [1, 2, 3, 4, 5].includes(Number(dia))))) {
-    throw badRequest('Los dias del comedor deben ser de lunes (1) a viernes (5).');
+    throw badRequest('Los días del comedor deben ser de lunes (1) a viernes (5).');
   }
   return transaction(usuarioId, async (tx) => {
     const ciclo = await cicloActivo(tx);
@@ -192,7 +192,7 @@ export async function inscribirComedor(usuarioId, alumnoId, { modalidad, dias, d
       'select id from inscripciones_comedor where alumno_id = $1 and ciclo_id = $2 and activa',
       [alumnoId, ciclo.id],
     );
-    if (previa) throw badRequest('El alumno ya esta inscripto al comedor en este ciclo.');
+    if (previa) throw badRequest('El alumno ya está inscripto al comedor en este ciclo.');
     return tx.queryOne(
       `insert into inscripciones_comedor (alumno_id, ciclo_id, modalidad, dias, dieta_especial, registrado_por)
        values ($1, $2, coalesce($3, 'Almuerzo'), coalesce($4::smallint[], '{1,2,3,4,5}'), $5, $6) returning *`,
@@ -209,7 +209,7 @@ export async function bajaComedor(usuarioId, id, alumnoId) {
       [id, alumnoId ?? null],
     ),
   );
-  if (!row) throw notFound('Inscripcion al comedor no encontrada.');
+  if (!row) throw notFound('Inscripción al comedor no encontrada.');
   return row;
 }
 

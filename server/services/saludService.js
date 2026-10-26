@@ -75,6 +75,6 @@ export async function verificarCredencial(token) {
      where f.qr_token::text = $1`,
     [token],
   );
-  if (!row) throw notFound('Credencial invalida.');
+  if (!row) throw notFound('Credencial inválida.');
   return { ...row, habilitado: row.estado_apto === 'Vigente' };
 }
