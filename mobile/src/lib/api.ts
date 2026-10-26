@@ -5,7 +5,8 @@ import { createApi } from '../../../shared/api';
 
 const TOKEN_KEY = 'educar_token';
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+// Por defecto usa la API publicada en Vercel; se puede cambiar con EXPO_PUBLIC_API_URL (ver .env.example).
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://centroeducativo-atm.vercel.app/api';
 export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? API_URL.replace(/\/api\/?$/, '');
 
 // El token se guarda cifrado en el telefono (SecureStore); en la version web, en localStorage.
