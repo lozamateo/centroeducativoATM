@@ -708,7 +708,7 @@ where c.anio = 2027;
 insert into materias (nombre, nivel_id, es_idioma, carga_horaria_semanal)
 select x.nombre, n.id, x.idioma, x.horas
 from (values
-  ('Inicial',    'Juego y expresion',       false, 10),
+  ('Inicial',    'Juego y expresión',       false, 10),
   ('Inicial',    'Inglés',                  true,   5),
   ('Inicial',    'Educación física',        false,  3),
   ('Primario',   'Prácticas del lenguaje',  false,  6),
