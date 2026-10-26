@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Educar para Transformar",
+    "slug": "educar-para-transformar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ar.edu.educarparatransformar"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1e3a8a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "ar.edu.educarparatransformar"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sharing"
+    ],
+    "scheme": "educar",
+    "splash": {
+      "backgroundColor": "#1e3a8a"
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
