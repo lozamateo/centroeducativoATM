@@ -1,17 +1,8 @@
 node_modules/
 dist/
-.env
-.env.local
-database/*.sqlite
 *.log
-node_modules
-dist
-database/*.sqlite-*
-figma-component.js
-outputs/
-work/
 .vercel
+
+# Variables de entorno: nunca subir los valores reales, solo las plantillas.
 .env*
 !.env.example
-
-.env*
