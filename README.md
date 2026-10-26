@@ -170,6 +170,7 @@ cd mobile && npx tsc --noEmit # app: tipos
 | Pruebas unitarias y de regresión | Vitest + cobertura v8 (reglas de inscripción a deportes y validaciones) | `tests/unit/` |
 | Pruebas dinámicas E2E | Cypress (simula a un usuario en el navegador) | `cypress/e2e/` |
 | Pipeline CI | GitHub Actions: lint → pruebas → build → artefactos → SonarCloud → E2E | `.github/workflows/ci.yml` |
+| Página en la web | `/calidad`: pipeline, herramientas, pruebas y métricas antes/después | `src/pages/CalidadPage.tsx` |
 | Análisis de calidad | SonarCloud (requiere el secret `SONAR_TOKEN`) | `sonar-project.properties` |
 | Política de Pull Requests | Plantilla de PR con checklist de autorrevisión + protección de `main` (CI obligatorio) | `.github/` |
 | Despliegue continuo | Vercel despliega `main` automáticamente; cada PR obtiene una URL de vista previa | `vercel.json` |

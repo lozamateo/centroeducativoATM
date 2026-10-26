@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Loading } from './components/ui';
 import { AuthProvider, useAuth } from './lib/auth';
 import { navigate, usePath } from './lib/router';
+import { CalidadPage } from './pages/CalidadPage';
 import { CredencialPage } from './pages/CredencialPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -20,6 +21,7 @@ function Router() {
 
   if (path === '/') return <HomePage />;
   if (path === '/login') return <LoginPage />;
+  if (path === '/calidad') return <CalidadPage />;
   const credencial = path.match(/^\/credencial\/([\w-]+)$/);
   if (credencial) return <CredencialPage token={credencial[1]} />;
 

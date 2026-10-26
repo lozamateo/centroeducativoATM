@@ -442,6 +442,7 @@ function SiteFooter() {
           <ul className="footer-list">
             {nav.map((item) => <li key={item.href}><a href={item.href}>{item.label}</a></li>)}
             <li><Link href="/login">Ingresar al sistema</Link></li>
+            <li><Link href="/calidad">Calidad y CI/CD</Link></li>
           </ul>
         </div>
       </div>

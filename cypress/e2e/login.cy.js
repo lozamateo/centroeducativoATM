@@ -19,6 +19,14 @@ describe('Sitio público', () => {
     cy.location('pathname').should('eq', '/login');
     cy.contains('h1', 'Ingresar al sistema');
   });
+
+  it('la página Calidad y CI/CD muestra el pipeline y las métricas', () => {
+    cy.visit('/');
+    cy.contains('footer a', 'Calidad y CI/CD').click();
+    cy.location('pathname').should('eq', '/calidad');
+    cy.get('.pipeline li').should('have.length', 9).first().should('contain', 'Commit');
+    cy.contains('Métricas: antes y después');
+  });
 });
 
 describe('Login', () => {
