@@ -1,20 +1,15 @@
-import { ArrowLeft, Home, SearchX } from 'lucide-react';
+import { Logo } from '../components/Logo';
+import { Link } from '../lib/router';
 
 export function NotFoundPage() {
   return (
-    <div className="internal-page not-found-page">
-      <main className="not-found-card">
-        <SearchX size={58} aria-hidden="true" />
-        <span className="eyebrow">Error 404</span>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo"><Logo /></div>
         <h1>Página no encontrada</h1>
-        <p>La dirección ingresada no existe o fue modificada. Podés volver al sitio institucional y continuar navegando.</p>
-        <div className="not-found-actions">
-          <a className="btn btn-primary" href="/"><Home size={18} /> Ir al inicio</a>
-          <button className="btn btn-outline" type="button" onClick={() => window.history.back()}>
-            <ArrowLeft size={18} /> Volver atrás
-          </button>
-        </div>
-      </main>
+        <p className="muted">La dirección ingresada no existe.</p>
+        <Link className="btn btn-primary btn-block" href="/">Volver al inicio</Link>
+      </div>
     </div>
   );
 }

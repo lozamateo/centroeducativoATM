@@ -1,215 +1,162 @@
-# Educar para Transformar
+# Educar para Transformar — Sistema de Gestión Integral
 
-Proyecto web institucional para el centro educativo privado **Educar para Transformar**, previsto para iniciar actividades en marzo de 2027 en las afueras de Resistencia, Chaco.
+Proyecto del equipo **ATM** (Loza, Mateo) para **Metodología de Sistemas II**: ecosistema informático del Centro Educativo
+"Educar para Transformar" (Resistencia, Chaco), que inicia actividades en marzo de 2027.
 
-El proyecto esta pensado como entrega clara y explicable para **Metodologia de Sistemas I**: landing institucional, backend funcional, base SQL local, datos de prueba, formularios y panel interno simple.
+Incluye **sitio web**, **aplicación móvil** y **API**, todos conectados a la misma base de datos. La web y la app tienen las
+mismas funciones y el mismo diseño, porque comparten el código de la carpeta `shared/`.
 
-## Stack
+## Arquitectura
 
-- Frontend: React + TypeScript + Vite.
-- Estilos: CSS comun responsive en `src/styles/global.css`.
-- Backend: Node.js + Express.
-- Base de datos: Postgres persistente en produccion via `DATABASE_URL`; SQLite queda solo como fallback de desarrollo y como origen para la migracion.
-- Iconos: `lucide-react`.
+Arquitectura en capas (N-capas) sobre un estilo cliente/servidor, con una API RESTful *stateless* como conector central
+(Plan de Trabajo, punto 1.5):
 
-## Instalacion
+```
+ Capa de presentación      Web (React + Vite)          App móvil (React Native + Expo)
+                                  \                         /
+                                   \---- HTTPS/JSON + JWT --/
+ Capa de seguridad y ruteo       API Express: autenticación JWT + middleware RBAC
+ Capa de lógica de negocio       AcademicoService · InscripcionService · SaludService · ReporteEngineService ...
+ Capa de persistencia            pool de conexiones (pg) → PostgreSQL en Supabase
+```
+
+| Capa | Tecnología | Carpeta |
+|---|---|---|
+| Web (sitio público + panel) | React 19, TypeScript, Vite | `src/` |
+| App móvil | React Native 0.88, Expo SDK 58, Expo Router | `mobile/` |
+| Código compartido web + app | TypeScript: tipos, colores, formatos, cliente de la API | `shared/` |
+| API RESTful | Node.js 22, Express 5, JWT, bcrypt | `server/` |
+| Base de datos | PostgreSQL (Supabase), triggers, vistas y RLS | `supabase/` |
+
+## Estructura
+
+```
+server/
+  index.js              armado de la API y manejo de errores
+  db.js                 capa de persistencia (pool + transacciones con auditoría)
+  middleware/auth.js    autenticación JWT y control de acceso por roles (RBAC)
+  routes/               publico, admin, salud, portal (familias, docentes, alumnos)
+  services/             lógica de negocio por dominio
+supabase/
+  schema.sql            esquema completo + datos de prueba (instalación nueva)
+  002_tildes.sql        actualización para bases creadas con la primera versión
+shared/                 código común a la web y la app
+src/                    web: sitio público, login, panel por rol
+mobile/                 app móvil (Expo)
+api/index.js            entrada de la API en Vercel
+```
+
+## 1. Base de datos (Supabase)
+
+1. En Supabase, abrí **SQL Editor → Create a new snippet**.
+2. Pegá todo `supabase/schema.sql` y tocá **Run**. Debe responder "Éxito".
+3. Si la base ya se había creado con la primera versión del esquema, ejecutá también `supabase/002_tildes.sql` (corrige
+   textos y mensajes; se puede correr más de una vez).
+
+El esquema crea las tablas de los cuatro dominios del plan (Personas y Seguridad, Estructura Académica, Actividades
+Deportivas, Servicios y Salud), las reglas de negocio como *triggers*, las vistas para los reportes, la tabla de auditoría
+y activa **Row Level Security** en todas las tablas: con la clave pública de Supabase no se puede leer nada; solo la API
+accede a los datos.
+
+## 2. Variables de entorno
+
+Copiá `.env.example` como `.env` (nunca lo subas a GitHub):
+
+| Variable | Dónde se obtiene |
+|---|---|
+| `DATABASE_URL` | Supabase → **Conecta** → **Directo** → *Session pooler*, reemplazando `[YOUR-PASSWORD]` |
+| `JWT_SECRET` | Cualquier texto largo y secreto (obligatorio en producción) |
+
+Para la app, copiá `mobile/.env.example` como `mobile/.env`:
+
+| Variable | Valor |
+|---|---|
+| `EXPO_PUBLIC_API_URL` | URL de la API publicada, por ejemplo `https://tu-proyecto.vercel.app/api` |
+| `EXPO_PUBLIC_SITE_URL` | URL del sitio web (se usa en el QR de la credencial) |
+
+## 3. Ejecutar en la computadora
 
 ```bash
 npm install
+npm run server      # API en http://localhost:3001/api (lee .env)
+npm run dev         # web en http://localhost:5173
 ```
 
-## Ejecutar backend
+App móvil:
 
 ```bash
-npm run server
+cd mobile
+npm install
+npx expo start      # escanear el QR con Expo Go en el celular
 ```
 
-API:
+En el celular, `localhost` no apunta a la computadora: usá la URL de Vercel o la IP de la PC en la red local
+(por ejemplo `http://192.168.0.10:3001/api`) en `EXPO_PUBLIC_API_URL`.
 
-```txt
-http://localhost:3001/api
-```
+## 4. Publicar
 
-Si existe `DATABASE_URL`, el backend usa Postgres. Si no existe, usa SQLite local en:
+**Web y API (Vercel):** importar el repositorio en Vercel y cargar `DATABASE_URL` y `JWT_SECRET` en
+*Settings → Environment Variables*. El archivo `vercel.json` ya envía `/api/*` a la API y el resto a la web.
 
-```txt
-database/educar_transformar.sqlite
-```
+**App:** con Expo Go alcanza para la demostración. Para generar el instalable: `npx eas-cli@latest build -p android`.
 
-En Vercel, `DATABASE_URL` es obligatoria para impedir que la aplicacion guarde datos en el sistema de archivos temporal.
+## Usuarios de prueba
 
-## Ejecutar frontend
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administrador | admin@educar.com | admin123 |
+| Familia (tutora de Tomás y Sofía) | tutor@educar.com | tutor123 |
+| Docente | docente@educar.com | docente123 |
+| Alumno | alumno@educar.com | alumno123 |
+| Enfermería | enfermeria@educar.com | enfermeria123 |
 
-En otra terminal:
+Sofía tiene el apto físico **vencido**: sirve para mostrar que el sistema bloquea su inscripción a deportes hasta que
+enfermería lo renueve.
 
-```bash
-npm run dev
-```
+## Requerimientos funcionales
 
-Sitio:
+| Requerimiento | Dónde está (web y app) |
+|---|---|
+| RF-01 Autenticación y RBAC | Login; panel distinto por rol; `server/middleware/auth.js`; Usuarios |
+| RF-02 a RF-06 Niveles, cursos, materias/idiomas, docentes | Cursos y materias, Docentes |
+| RF-07 a RF-09 Legajos, vínculo familiar, matrícula | Alumnos (ficha + familia), Inscripciones, portal de familias |
+| RF-10 y RF-11 Deportes con control de solapamiento (máx. 2) | Deportes (comisiones y horarios); inscripción desde familia o secretaría |
+| RF-12 y RF-13 Transporte (4 recorridos) y comedor | Transporte y comedor en la ficha del alumno |
+| RF-14 y RF-15 Autogestión de familias y docentes | Portal de familias, portal docente y portal del alumno |
+| RF-16 a RF-21 Reportes MIS | Tablero, padrón por curso, padrón de transporte, ocupación de deportes, comedor, ficha 360 (PDF) |
+| RF-22 Ficha médica, apto físico y credencial QR | Enfermería; credencial QR en el portal; verificación pública en `/credencial/:token` |
 
-```txt
-http://localhost:5173
-```
+## Reglas de negocio
 
-## Rutas frontend
+Se validan en la API (mensajes claros) y en la base de datos (triggers y restricciones), para que se cumplan aunque haya
+inscripciones simultáneas:
 
-```txt
-/       Landing institucional
-/login  Login demo por roles
-/admin  Panel de gestion interno
-```
-
-## Usuarios demo
-
-```txt
-admin@educar.com    / admin123
-docente@educar.com  / docente123
-padre@educar.com    / padre123
-alumno@educar.com   / alumno123
-personal@educar.com / personal123
-```
-
-## Modulos representados
-
-- Alumnos
-- Docentes
-- Academico: cursos y asignaciones docentes
-- Servicios
-- Instalaciones
-- Comunicacion: noticias, actividades, galeria y contacto
-- Solicitud de inscripcion
-- Opiniones web
-- Postulaciones de empleo
-- Acceso basico por roles
-- Panel interno simple
-
-## Base de datos
-
-Al iniciar el backend se crean o actualizan automaticamente las tablas y datos demo. En Vercel debe configurarse una base Postgres persistente mediante:
-
-```txt
-DATABASE_URL
-```
-
-La opcion mas directa es instalar **Neon** desde Vercel Marketplace, crear una base y conectarla al proyecto `centroeducativo-tp` para Production, Preview y Development. La integracion agrega `DATABASE_URL` automaticamente.
-
-Para copiar los datos de la base SQLite actual:
-
-```bash
-npx vercel env pull .env.local
-npm run db:migrate
-```
-
-El importador exige que Postgres este vacio. Si la API ya creo los datos demo y queres reemplazarlos por el contenido exacto de SQLite:
-
-```bash
-npm run db:migrate -- --replace
-```
-
-Tablas principales:
-
-- niveles_educativos
-- alumnos
-- docentes
-- cursos
-- asignaciones_docentes
-- instalaciones
-- servicios
-- alumnos_servicios
-- asistencias_diarias
-- evaluaciones
-- calificaciones_alumnos
-- usuarios_acceso
-- opiniones_web
-- solicitudes_inscripcion
-- postulaciones_empleo
-- noticias
-- actividades_escolares
-- galeria_imagenes
-- contacto_mensajes
+- Máximo **2 deportes** activos por alumno y sin **superposición horaria**.
+- La inscripción a deportes exige **apto físico vigente** y que la comisión sea del **nivel** del alumno.
+- **Un único recorrido** de transporte activo por alumno, con control de capacidad.
+- **Una matrícula** por alumno y ciclo lectivo, con control de vacantes; al matricular se asignan las materias del curso.
+- Una inscripción activa al comedor por ciclo.
+- Cada alta, modificación o baja queda en la **auditoría** con usuario y fecha.
 
 ## Endpoints principales
 
-```txt
-GET  /api/health
-GET  /api/niveles
+```
+POST /api/auth/login                      GET  /api/auth/me
+GET  /api/niveles | noticias | deportes | recorridos
+POST /api/contacto | solicitudes          GET  /api/credencial/:token
 
-GET  /api/alumnos
-GET  /api/alumnos/:id
-POST /api/alumnos
-PUT  /api/alumnos/:id
-DELETE /api/alumnos/:id
-
-GET  /api/docentes
-GET  /api/docentes/:id
-POST /api/docentes
-PUT  /api/docentes/:id
-DELETE /api/docentes/:id
-
-GET  /api/cursos
-POST /api/cursos
-PUT  /api/cursos/:id
-DELETE /api/cursos/:id
-
-GET  /api/asignaciones-docentes
-POST /api/asignaciones-docentes
-PUT  /api/asignaciones-docentes/:id
-DELETE /api/asignaciones-docentes/:id
-
-GET  /api/servicios
-POST /api/servicios
-PUT  /api/servicios/:id
-DELETE /api/servicios/:id
-
-GET  /api/instalaciones
-POST /api/instalaciones
-PUT  /api/instalaciones/:id
-DELETE /api/instalaciones/:id
-
-GET  /api/noticias
-GET  /api/noticias/:id
-POST /api/noticias
-PUT  /api/noticias/:id
-DELETE /api/noticias/:id
-
-GET  /api/opiniones
-POST /api/opiniones
-PUT  /api/opiniones/:id/moderar
-
-GET  /api/solicitudes-inscripcion
-POST /api/solicitudes-inscripcion
-PUT  /api/solicitudes-inscripcion/:id/estado
-
-GET  /api/postulaciones
-POST /api/postulaciones
-PUT  /api/postulaciones/:id/estado
-
-GET  /api/usuarios
-POST /api/usuarios
-PUT  /api/usuarios/:id
-POST /api/login-demo
-
-GET  /api/actividades
-POST /api/actividades
-PUT  /api/actividades/:id
-DELETE /api/actividades/:id
-
-GET  /api/galeria
-POST /api/galeria
-PUT  /api/galeria/:id
-DELETE /api/galeria/:id
-
-POST /api/contacto
-GET  /api/contacto
+/api/portal/familia/hijos[/:id[/opciones|/matricula|/deportes|/transporte|/comedor]]   (rol TUTOR)
+/api/portal/docente                                                                      (rol DOCENTE)
+/api/portal/alumno                                                                       (rol ALUMNO)
+/api/salud/fichas[/:alumnoId]                                                            (rol ENFERMERIA)
+/api/admin/{alumnos,tutores,profesores,cursos,materias,deportes,comisiones,
+            matriculas,inscripciones-deporte,transporte,comedor,usuarios,
+            noticias,mensajes,solicitudes,reportes/*}                                    (rol ADMIN)
 ```
 
-## Validacion
-
-Comando de build:
+## Validación
 
 ```bash
-npm run build
+npm run build                 # web: tipos + compilación
+cd mobile && npx tsc --noEmit # app: tipos
 ```
-
-El backend valida campos obligatorios y formato de email en formularios principales. El frontend muestra mensajes de carga, exito y error en inscripcion, opinion, postulacion y contacto.
