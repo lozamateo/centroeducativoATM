@@ -59,8 +59,8 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           build: npm run build
-          start: npx vite preview --port 4173 --strictPort
-          wait-on: http://localhost:4173
+          start: npx vite preview --host 127.0.0.1 --port 4173 --strictPort
+          wait-on: http://127.0.0.1:4173
       - name: Capturas si falla
         if: failure()
         uses: actions/upload-artifact@v4
