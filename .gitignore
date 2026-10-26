@@ -6,3 +6,8 @@ dist/
 # Variables de entorno: nunca subir los valores reales, solo las plantillas.
 .env*
 !.env.example
+
+# Reportes de pruebas y cobertura
+coverage/
+cypress/screenshots/
+cypress/videos/

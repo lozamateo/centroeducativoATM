@@ -3,6 +3,7 @@
 // dar mensajes claros y se ejecuta todo en una transaccion.
 import { query, queryOne, transaction } from '../db.js';
 import { badRequest, notFound } from '../errors.js';
+import { aptoVigente, motivoNoDisponible } from '../rules/deportes.js';
 import { toId } from '../validation.js';
 import { cicloActivo } from './academicoService.js';
 
@@ -126,21 +127,10 @@ export async function comisionesDisponibles(alumnoId) {
     [alumnoId],
   );
   const cantidadActual = new Set(actuales.map((row) => row.id)).size;
-  const aptoVigente = alumno.apto_fisico_vence && alumno.apto_fisico_vence >= new Date().toISOString().slice(0, 10);
+  const apto = aptoVigente(alumno.apto_fisico_vence);
 
   return comisiones.map((comision) => {
-    let motivo = null;
-    if (actuales.some((row) => row.comision_id === comision.id)) motivo = 'Ya inscripto';
-    else if (!aptoVigente) motivo = 'Apto físico vencido o ausente';
-    else if (actuales.some((row) => row.deporte_id === comision.deporte_id)) motivo = 'Ya inscripto en este deporte';
-    else if (cantidadActual >= 2) motivo = 'Máximo de 2 deportes alcanzado';
-    else if (comision.inscriptos >= comision.cupo) motivo = 'Sin cupo';
-    else if (
-      comision.horarios.some((h) =>
-        actuales.some((a) => a.dia_semana === h.dia_semana && a.hora_inicio < h.hora_fin && h.hora_inicio < a.hora_fin),
-      )
-    )
-      motivo = 'Se superpone con otro deporte';
+    const motivo = motivoNoDisponible(comision, actuales, { apto, cantidadActual });
     return { ...comision, disponible: motivo === null, motivo };
   });
 }
