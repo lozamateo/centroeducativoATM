@@ -179,6 +179,5 @@ cd mobile && npx tsc --noEmit # app: tipos
 npm run lint            # ESLint
 npm test                # pruebas unitarias
 npm run test:coverage   # con reporte de cobertura en coverage/
-npm run build && npx vite preview --host 127.0.0.1 --port 4173   # y en otra terminal:
-npm run e2e             # Cypress
+npm run build && npm run e2e:ci   # levanta la web y ejecuta Cypress
 ```

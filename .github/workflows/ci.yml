@@ -55,12 +55,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Cypress (instala, compila, levanta la web y ejecuta las pruebas)
-        uses: cypress-io/github-action@v6
-        with:
-          build: npm run build
-          start: npx vite preview --host 127.0.0.1 --port 4173 --strictPort
-          wait-on: http://127.0.0.1:4173
+      - name: Instalar dependencias y Cypress
+        run: npm ci
+      - name: Build de la web
+        run: npm run build
+      - name: Cypress (levanta la web y ejecuta las pruebas)
+        run: npm run e2e:ci
       - name: Capturas si falla
         if: failure()
         uses: actions/upload-artifact@v4

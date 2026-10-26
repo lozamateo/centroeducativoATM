@@ -16,7 +16,9 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "e2e": "cypress run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "preview:e2e": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "e2e:ci": "start-server-and-test preview:e2e http://127.0.0.1:4173 e2e"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.1",
