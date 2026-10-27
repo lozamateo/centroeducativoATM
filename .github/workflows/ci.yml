@@ -1,0 +1,69 @@
+# Pipeline CI/CD: se ejecuta en cada push a main y en cada Pull Request.
+# Etapas: lint (prueba estática) -> pruebas unitarias con cobertura -> build -> artefactos -> SonarCloud -> E2E (Cypress).
+# El despliegue lo hace Vercel automáticamente al integrar en main (despliegue continuo).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  calidad:
+    name: Lint, pruebas y build
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+      - name: Lint (ESLint)
+        run: npm run lint
+      - name: Pruebas unitarias con cobertura (Vitest)
+        run: npm run test:coverage
+      - name: Build de la web (tsc + Vite)
+        run: npm run build
+      - name: Guardar artefactos (build y cobertura)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: |
+            dist/
+            coverage/
+          retention-days: 14
+      # Se ejecuta solo si el secret SONAR_TOKEN está cargado en Settings -> Secrets -> Actions.
+      - name: Análisis SonarCloud
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-scan-action@v5
+
+  e2e:
+    name: Pruebas E2E (Cypress)
+    needs: calidad
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Instalar dependencias y Cypress
+        run: npm ci
+      - name: Build de la web
+        run: npm run build
+      - name: Cypress (levanta la web y ejecuta las pruebas)
+        run: npm run e2e:ci
+      - name: Capturas si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

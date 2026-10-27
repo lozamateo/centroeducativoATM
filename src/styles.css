@@ -431,3 +431,15 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
   .table td.actions { justify-content: flex-end; }
   .table td.actions::before { content: none; }
 }
+
+/* Calidad y CI/CD */
+.calidad-main { display: grid; gap: 20px; padding: 48px 0 64px; }
+.calidad-main .section-header { margin-bottom: 8px; }
+.pipeline { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; counter-reset: etapa; }
+.pipeline li { counter-increment: etapa; padding: 12px; border-radius: var(--radius); background: var(--accent-soft); border-left: 4px solid var(--accent); }
+.pipeline li strong { display: block; color: var(--primary); }
+.pipeline li strong::before { content: counter(etapa) '. '; }
+.pipeline li small { color: var(--muted); }
+.calidad-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.calidad-links a { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-weight: 700; }
+.calidad-page code { font-size: 0.85rem; background: var(--background-soft); padding: 2px 6px; border-radius: 4px; }

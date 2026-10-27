@@ -160,3 +160,24 @@ POST /api/contacto | solicitudes          GET  /api/credencial/:token
 npm run build                 # web: tipos + compilación
 cd mobile && npx tsc --noEmit # app: tipos
 ```
+
+## Calidad y CI/CD
+
+| Práctica | Herramienta | Dónde |
+|---|---|---|
+| Prueba estática (linter) | ESLint 9 (también en VS Code con la extensión recomendada) | `eslint.config.js`, `.vscode/` |
+| Pre-commit hooks | Husky + lint-staged: bloquea el commit si el lint o las pruebas fallan | `.husky/pre-commit` |
+| Pruebas unitarias y de regresión | Vitest + cobertura v8 (reglas de inscripción a deportes y validaciones) | `tests/unit/` |
+| Pruebas dinámicas E2E | Cypress (simula a un usuario en el navegador) | `cypress/e2e/` |
+| Pipeline CI | GitHub Actions: lint → pruebas → build → artefactos → SonarCloud → E2E | `.github/workflows/ci.yml` |
+| Página en la web | `/calidad`: pipeline, herramientas, pruebas y métricas antes/después | `src/pages/CalidadPage.tsx` |
+| Análisis de calidad | SonarCloud (requiere el secret `SONAR_TOKEN`) | `sonar-project.properties` |
+| Política de Pull Requests | Plantilla de PR con checklist de autorrevisión + protección de `main` (CI obligatorio) | `.github/` |
+| Despliegue continuo | Vercel despliega `main` automáticamente; cada PR obtiene una URL de vista previa | `vercel.json` |
+
+```bash
+npm run lint            # ESLint
+npm test                # pruebas unitarias
+npm run test:coverage   # con reporte de cobertura en coverage/
+npm run build && npm run e2e:ci   # levanta la web y ejecuta Cypress
+```
