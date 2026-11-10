@@ -27,7 +27,8 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-updates"
     ],
     "scheme": "educar",
     "splash": {
@@ -35,6 +36,16 @@
     },
     "experiments": {
       "typedRoutes": false
+    },
+    "owner": "chimuelo13",
+    "runtimeVersion": "exposdk:58.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/92e57b9c-11c3-415e-9537-b4e6e9713139"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "92e57b9c-11c3-415e-9537-b4e6e9713139"
+      }
     }
   }
 }
