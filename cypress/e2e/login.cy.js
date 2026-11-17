@@ -9,7 +9,7 @@ describe('Sitio público', () => {
         { id: 1, deporte: 'Fútbol', nivel: 'Primario', horarios: [{ dia_semana: 2, hora_inicio: '14:00', hora_fin: '15:30' }] },
       ],
     });
-    cy.intercept('GET', '**/api/{niveles,noticias,recorridos}', { body: [] });
+    cy.intercept('GET', '**/api/{niveles,noticias,recorridos,opiniones,empleos}', { body: [] });
   });
 
   it('muestra los deportes publicados y lleva al login', () => {

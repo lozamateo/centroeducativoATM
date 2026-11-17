@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import {
-  ArrowRight, BookOpen, Bus, CalendarDays, Clock, Dumbbell, Globe2, GraduationCap, HeartPulse, LogIn, Mail, MapPin,
-  Menu, Phone, QrCode, Smartphone, Sparkles, Trophy, Users, UtensilsCrossed, X,
+  ArrowRight, BookOpen, Briefcase, Bus, CalendarDays, Clock, Dumbbell, Facebook, Globe2, GraduationCap, HandHeart, HeartPulse,
+  Instagram, LifeBuoy, LogIn, Mail, MapPin, Menu, MessageCircle, Phone, QrCode, Smartphone, Sparkles, Star, Trophy, Users,
+  UtensilsCrossed, X,
 } from 'lucide-react';
 import type { Comision, Nivel } from '../../shared/types';
-import { horarios, hora, fecha } from '../../shared/format';
+import { CONTACTO, horarios, hora, fecha } from '../../shared/format';
 import { institucion } from '../../shared/theme';
 import { Logo } from '../components/Logo';
 import { Alert, Button, Field, Input, Select, Textarea } from '../components/ui';
@@ -16,11 +17,13 @@ import { Link } from '../lib/router';
 import { useAction, useData } from '../lib/useData';
 
 const nav = [
-  { href: '#propuesta', label: 'Propuesta' },
+  { href: '#propuesta', label: 'Nosotros' },
   { href: '#niveles', label: 'Niveles' },
-  { href: '#deportes', label: 'Deportes' },
-  { href: '#servicios', label: 'Servicios' },
+  { href: '#servicios', label: 'Bienestar' },
+  { href: '#galeria', label: 'Galería' },
   { href: '#noticias', label: 'Noticias' },
+  { href: '#opiniones', label: 'Opiniones' },
+  { href: '#empleo', label: 'Empleo' },
   { href: '#contacto', label: 'Contacto' },
 ];
 
@@ -32,9 +35,9 @@ const nivelesRespaldo: Nivel[] = [
 
 const pilares = [
   { icon: <Clock />, titulo: 'Jornada extendida', texto: 'Más tiempo de aprendizaje, talleres y acompañamiento dentro de la escuela.' },
-  { icon: <Globe2 />, titulo: 'Formación plurilingüe', texto: 'Inglés desde el Nivel Inicial y Portugués desde el Primario.' },
-  { icon: <Trophy />, titulo: 'Deporte propio', texto: 'Seis disciplinas con profesores del centro y control de apto físico.' },
-  { icon: <HeartPulse />, titulo: 'Bienestar integral', texto: 'Enfermería, comedor y transporte para toda la jornada.' },
+  { icon: <Globe2 />, titulo: 'Formación plurilingüe', texto: 'Inglés desde el Nivel Inicial; Portugués y Francés desde el Primario.' },
+  { icon: <Trophy />, titulo: 'Deporte propio', texto: 'Pileta, canchas, pista de atletismo y gimnasio cubierto, con profesores del centro.' },
+  { icon: <HeartPulse />, titulo: 'Bienestar integral', texto: 'Apoyo estudiantil, enfermería, comedor y transporte para toda la jornada.' },
 ];
 
 export function HomePage() {
@@ -48,11 +51,17 @@ export function HomePage() {
         <Deportes />
         <Servicios />
         <Comunidad />
+        <Galeria />
         <Noticias />
+        <Opiniones />
         <Preinscripcion />
+        <Empleo />
         <Contacto />
       </main>
       <SiteFooter />
+      <a className="whatsapp-flotante" href={`https://wa.me/${CONTACTO.whatsapp}`} target="_blank" rel="noreferrer" aria-label="Escribinos por WhatsApp">
+        <MessageCircle size={28} />
+      </a>
     </div>
   );
 }
@@ -106,8 +115,8 @@ function Hero() {
           </div>
           <div className="hero-stats">
             <div><strong>3</strong><span>niveles educativos</span></div>
-            <div><strong>2</strong><span>idiomas extranjeros</span></div>
-            <div><strong>6</strong><span>deportes propios</span></div>
+            <div><strong>3</strong><span>idiomas extranjeros</span></div>
+            <div><strong>9</strong><span>deportes propios</span></div>
           </div>
         </div>
         <aside className="hero-card">
@@ -139,7 +148,8 @@ function Propuesta() {
   return (
     <section id="propuesta" className="section">
       <div className="container">
-        <SectionHeader eyebrow="Nuestra propuesta" title="Una escuela pensada para transformar" text="Una institución privada que inicia sus actividades en 2027 con una propuesta moderna, cercana y exigente." />
+        <SectionHeader eyebrow="Quiénes somos" title="Una escuela pensada para transformar" text="Somos una institución de gestión privada de alta calidad educativa, ubicada en las afueras de Resistencia, que inicia sus actividades en marzo de 2027." />
+        <blockquote className="mision">Inspiramos, desafiamos y empoderamos a todos nuestros alumnos a ser miembros comprometidos y éticos de una comunidad global, para que se conviertan en agentes de cambio conscientes de sí mismos, seguros, innovadores y colaborativos.</blockquote>
         <div className="grid grid-4">
           {pilares.map((pilar) => (
             <article key={pilar.titulo} className="feature-card">
@@ -214,7 +224,24 @@ function Servicios() {
   return (
     <section id="servicios" className="section">
       <div className="container">
-        <SectionHeader eyebrow="Servicios" title="Acompañamos toda la jornada" />
+        <SectionHeader eyebrow="Bienestar estudiantil" title="Acompañamos toda la jornada" text="Servicio de apoyo estudiantil, enfermería, comedor, transporte y laboratorios de computación, física y química." />
+        <div className="grid grid-3 bienestar-extra">
+          <article className="service-card">
+            <div className="feature-icon"><LifeBuoy /></div>
+            <h3>Apoyo estudiantil</h3>
+            <p>Gabinete psicopedagógico, tutorías y clases de apoyo para acompañar las trayectorias de cada alumno.</p>
+          </article>
+          <article className="service-card">
+            <div className="feature-icon"><HandHeart /></div>
+            <h3>Convivencia y orientación</h3>
+            <p>Talleres de convivencia, educación emocional y orientación vocacional en el Secundario.</p>
+          </article>
+          <article className="service-card">
+            <div className="feature-icon"><BookOpen /></div>
+            <h3>Laboratorios</h3>
+            <p>Laboratorios de computación, física y química equipados para el trabajo práctico en todos los niveles.</p>
+          </article>
+        </div>
         <div className="grid grid-3">
           <article className="service-card">
             <div className="feature-icon"><Bus /></div>
@@ -287,7 +314,7 @@ function Noticias() {
   const { data } = useData(() => api.noticias());
   if (!data?.length) return null;
   return (
-    <section id="noticias" className="section">
+    <section id="noticias" className="section section-soft">
       <div className="container">
         <SectionHeader eyebrow="Novedades" title="Noticias del centro" />
         <div className="grid grid-3">
@@ -394,7 +421,7 @@ function Contacto() {
   }
 
   return (
-    <section id="contacto" className="section">
+    <section id="contacto" className="section section-soft">
       <div className="container form-section">
         <div>
           <span className="eyebrow">Contacto</span>
@@ -404,6 +431,11 @@ function Contacto() {
             <li><Phone size={20} /> {institucion.telefono}</li>
             <li><Mail size={20} /> {institucion.email}</li>
           </ul>
+          <div className="redes">
+            <a className="whatsapp" href={`https://wa.me/${CONTACTO.whatsapp}`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp {CONTACTO.whatsappTexto}</a>
+            <a href={CONTACTO.instagram} target="_blank" rel="noreferrer"><Instagram size={18} /> Instagram</a>
+            <a href={CONTACTO.facebook} target="_blank" rel="noreferrer"><Facebook size={18} /> Facebook</a>
+          </div>
         </div>
         <form className="card form-card" onSubmit={submit}>
           {message && <Alert tipo={message.tipo} onClose={() => setMessage(null)}>{message.texto}</Alert>}
@@ -415,6 +447,143 @@ function Contacto() {
             <Field label="Mensaje" full><Textarea required maxLength={2000} value={form.mensaje} onChange={set('mensaje')} /></Field>
           </div>
           <Button type="submit" loading={busy}>Enviar mensaje</Button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+const fotos = [
+  { src: '/galeria/edificio.jpg', titulo: 'Edificio principal' },
+  { src: '/galeria/pileta.svg', titulo: 'Pileta de natación' },
+  { src: '/galeria/cancha.svg', titulo: 'Canchas de fútbol' },
+  { src: '/galeria/gimnasio.svg', titulo: 'Gimnasio cubierto' },
+  { src: '/galeria/laboratorio.svg', titulo: 'Laboratorios' },
+  { src: '/galeria/comedor.svg', titulo: 'Comedor' },
+];
+
+function Galeria() {
+  return (
+    <section id="galeria" className="section">
+      <div className="container">
+        <SectionHeader eyebrow="Galería" title="Conocé nuestras instalaciones" text="Pileta de natación, canchas de fútbol, pista de atletismo, gimnasio cubierto, laboratorios y comedor. Algunas imágenes son ilustraciones del proyecto." />
+        <div className="galeria">
+          {fotos.map((f) => (
+            <figure key={f.src}>
+              <img src={f.src} alt={f.titulo} loading="lazy" />
+              <figcaption>{f.titulo}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Si la API no responde una lista (por ejemplo, sin conexión), la sección queda vacía en lugar de romper la página.
+const lista = <T,>(datos: T[] | null | undefined): T[] => (Array.isArray(datos) ? datos : []);
+
+const estrellas = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+
+// Cualquier visitante puede dejar su opinión sin iniciar sesión.
+function Opiniones() {
+  const { data, reload } = useData(() => api.opiniones());
+  const [form, setForm] = useState({ nombre: '', relacion: 'Familia', comentario: '', puntaje: 5 });
+  const { busy, message, setMessage, run } = useAction();
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (await run(() => api.enviarOpinion(form), '¡Gracias por tu opinión!')) {
+      setForm({ nombre: '', relacion: 'Familia', comentario: '', puntaje: 5 });
+      reload();
+    }
+  };
+
+  return (
+    <section id="opiniones" className="section">
+      <div className="container">
+        <SectionHeader eyebrow="Opiniones" title="Lo que dice nuestra comunidad" text="Dejanos tu opinión: no hace falta registrarse." />
+        <div className="grid grid-2">
+          <div className="stack">
+            {lista(data).slice(0, 6).map((o) => (
+              <article key={o.id} className="card opinion">
+                <span className="estrellas" aria-label={`${o.puntaje} de 5 estrellas`}>{estrellas(o.puntaje)}</span>
+                <p>{o.comentario}</p>
+                <small className="muted">{o.nombre} · {o.relacion}</small>
+              </article>
+            ))}
+          </div>
+          <form className="card form-card" onSubmit={submit}>
+            {message && <Alert tipo={message.tipo} onClose={() => setMessage(null)}>{message.texto}</Alert>}
+            <div className="form-grid">
+              <Field label="Nombre"><Input required maxLength={80} value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} /></Field>
+              <Field label="Soy">
+                <Select value={form.relacion} onChange={(e) => setForm({ ...form, relacion: e.target.value })}>
+                  {['Familia', 'Alumno', 'Ex alumno', 'Docente', 'Visitante'].map((r) => <option key={r}>{r}</option>)}
+                </Select>
+              </Field>
+              <Field label="Puntaje" full>
+                <div className="estrellas-input" role="radiogroup" aria-label="Puntaje">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button key={n} type="button" role="radio" aria-checked={form.puntaje === n} aria-label={`${n} estrellas`}
+                      className={n <= form.puntaje ? 'activa' : ''} onClick={() => setForm({ ...form, puntaje: n })}><Star size={26} fill="currentColor" /></button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Tu opinión" full><Textarea required minLength={5} maxLength={600} value={form.comentario} onChange={(e) => setForm({ ...form, comentario: e.target.value })} /></Field>
+            </div>
+            <Button type="submit" loading={busy}>Publicar opinión</Button>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Empleo() {
+  const { data } = useData(() => api.empleos());
+  const [form, setForm] = useState({ busqueda_id: '', puesto: '', nombre: '', email: '', telefono: '', cv_url: '', mensaje: '' });
+  const { busy, message, setMessage, run } = useAction();
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    const puesto = lista(data).find((b) => b.id === Number(form.busqueda_id))?.puesto ?? form.puesto;
+    if (await run(() => api.postular({ ...form, puesto }), 'Recibimos tu postulación. ¡Gracias!')) {
+      setForm({ busqueda_id: '', puesto: '', nombre: '', email: '', telefono: '', cv_url: '', mensaje: '' });
+    }
+  };
+
+  return (
+    <section id="empleo" className="section">
+      <div className="container form-section">
+        <div>
+          <span className="eyebrow">Empleo</span>
+          <h2>Sumate a nuestro equipo</h2>
+          <p>Buscamos docentes, profesionales y personal de apoyo comprometidos con la educación.</p>
+          <ul className="route-list">
+            {lista(data).map((b) => (
+              <li key={b.id}><strong><Briefcase size={16} /> {b.puesto}</strong><span>{b.area} · {b.modalidad}. {b.descripcion}</span></li>
+            ))}
+          </ul>
+        </div>
+        <form className="card form-card" onSubmit={submit}>
+          {message && <Alert tipo={message.tipo} onClose={() => setMessage(null)}>{message.texto}</Alert>}
+          <div className="form-grid">
+            <Field label="Búsqueda" full>
+              <Select value={form.busqueda_id} onChange={set('busqueda_id')}>
+                <option value="">Postulación espontánea</option>
+                {lista(data).map((b) => <option key={b.id} value={b.id}>{b.puesto}</option>)}
+              </Select>
+            </Field>
+            {!form.busqueda_id && <Field label="Puesto de interés" full><Input required value={form.puesto} onChange={set('puesto')} /></Field>}
+            <Field label="Nombre y apellido"><Input required value={form.nombre} onChange={set('nombre')} /></Field>
+            <Field label="Email"><Input required type="email" value={form.email} onChange={set('email')} /></Field>
+            <Field label="Teléfono"><Input type="tel" value={form.telefono} onChange={set('telefono')} /></Field>
+            <Field label="Enlace a tu CV"><Input type="url" placeholder="https://..." value={form.cv_url} onChange={set('cv_url')} /></Field>
+            <Field label="Mensaje" full><Textarea maxLength={2000} value={form.mensaje} onChange={set('mensaje')} /></Field>
+          </div>
+          <Button type="submit" loading={busy}>Enviar postulación</Button>
         </form>
       </div>
     </section>
@@ -442,6 +611,7 @@ function SiteFooter() {
           <ul className="footer-list">
             {nav.map((item) => <li key={item.href}><a href={item.href}>{item.label}</a></li>)}
             <li><Link href="/login">Ingresar al sistema</Link></li>
+            <li><a href={`https://wa.me/${CONTACTO.whatsapp}`} target="_blank" rel="noreferrer">WhatsApp</a></li>
             <li><Link href="/calidad">Calidad y CI/CD</Link></li>
           </ul>
         </div>

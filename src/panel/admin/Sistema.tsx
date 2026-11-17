@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { CheckCheck, KeyRound, Pencil, Plus, Trash2 } from 'lucide-react';
 import { ROLES, fecha, fechaHora } from '../../../shared/format';
-import type { EstadoSolicitud, Noticia, Rol, UsuarioListado } from '../../../shared/types';
+import type { EstadoSolicitud, Noticia, Postulacion, Rol, UsuarioListado } from '../../../shared/types';
 import { Badge, Button, Card, DataState, Feedback, PageHeader, Select, Table, Tabs } from '../../components/ui';
 import type { Tone } from '../../components/ui';
 import { api } from '../../lib/api';
@@ -101,7 +101,7 @@ const noticiaFields: FieldConfig[] = [
 ];
 
 export function ContenidoPage() {
-  const [tab, setTab] = useState<'solicitudes' | 'mensajes' | 'noticias'>('solicitudes');
+  const [tab, setTab] = useState<'solicitudes' | 'mensajes' | 'noticias' | 'opiniones' | 'postulaciones'>('solicitudes');
   return (
     <>
       <PageHeader title="Sitio web" subtitle="Pre-inscripciones, mensajes de contacto y noticias del portal público." />
@@ -109,10 +109,14 @@ export function ContenidoPage() {
         { key: 'solicitudes', label: 'Pre-inscripciones' },
         { key: 'mensajes', label: 'Mensajes' },
         { key: 'noticias', label: 'Noticias' },
+        { key: 'opiniones', label: 'Opiniones' },
+        { key: 'postulaciones', label: 'Empleo' },
       ]} />
       {tab === 'solicitudes' && <Solicitudes />}
       {tab === 'mensajes' && <Mensajes />}
       {tab === 'noticias' && <Noticias />}
+      {tab === 'opiniones' && <OpinionesAdmin />}
+      {tab === 'postulaciones' && <Postulaciones />}
     </>
   );
 }
@@ -133,6 +137,47 @@ function Solicitudes() {
           { header: 'Estado', render: (s) => (
             <Select value={s.estado} onChange={(e) => accion.run(() => api.admin.estadoSolicitud(s.id, e.target.value as EstadoSolicitud), 'Estado actualizado.').then(reload)}>
               {(Object.keys(tonoSolicitud) as EstadoSolicitud[]).map((estado) => <option key={estado}>{estado}</option>)}
+            </Select>
+          ) },
+        ]} />
+      </Card>
+    </DataState>
+  );
+}
+
+// Las opiniones se publican sin iniciar sesión; el administrador puede ocultarlas.
+function OpinionesAdmin() {
+  const { data, loading, error, reload } = useData(() => api.admin.opiniones());
+  return (
+    <DataState loading={loading} error={error} onRetry={reload}>
+      <Card>
+        <Table rows={data ?? []} rowKey={(o) => o.id} empty="No hay opiniones." columns={[
+          { header: 'Fecha', render: (o) => fechaHora(o.created_at) },
+          { header: 'De', render: (o) => <>{o.nombre}<small className="block muted">{o.relacion}</small></> },
+          { header: 'Puntaje', render: (o) => <span className="estrellas">{'★'.repeat(o.puntaje)}</span> },
+          { header: 'Opinión', render: (o) => o.comentario },
+          { header: '', className: 'actions', render: (o) => (
+            <Button variant="ghost" size="sm" onClick={() => api.admin.visibilidadOpinion(o.id, !o.visible).then(reload)}>{o.visible ? 'Ocultar' : 'Publicar'}</Button>
+          ) },
+        ]} />
+      </Card>
+    </DataState>
+  );
+}
+
+function Postulaciones() {
+  const { data, loading, error, reload } = useData(() => api.admin.postulaciones());
+  return (
+    <DataState loading={loading} error={error} onRetry={reload}>
+      <Card>
+        <Table rows={data ?? []} rowKey={(p) => p.id} empty="No hay postulaciones." columns={[
+          { header: 'Fecha', render: (p) => fecha(p.created_at) },
+          { header: 'Postulante', render: (p) => <>{p.nombre}<small className="block muted">{p.email} {p.telefono}</small></> },
+          { header: 'Puesto', render: (p) => <strong>{p.puesto}</strong> },
+          { header: 'Mensaje', render: (p) => <>{p.mensaje ?? '-'}{p.cv_url && <small className="block"><a href={p.cv_url} target="_blank" rel="noreferrer">Ver CV</a></small>}</> },
+          { header: 'Estado', render: (p) => (
+            <Select value={p.estado} onChange={(e) => api.admin.estadoPostulacion(p.id, e.target.value as Postulacion['estado']).then(reload)}>
+              {['Nueva', 'Revisada', 'Entrevista', 'Descartada'].map((estado) => <option key={estado}>{estado}</option>)}
             </Select>
           ) },
         ]} />

@@ -10,6 +10,7 @@ export default function RootLayout() {
       <Stack screenOptions={headerOptions}>
         <Stack.Screen name="index" options={{ headerShown: false, title: 'Inicio' }} />
         <Stack.Screen name="login" options={{ title: 'Ingresar' }} />
+        <Stack.Screen name="recuperar" options={{ title: 'Recuperar contraseña' }} />
         <Stack.Screen name="preinscripcion" options={{ title: 'Pre-inscripción' }} />
         <Stack.Screen name="contacto" options={{ title: 'Contacto' }} />
         <Stack.Screen name="credencial/[token]" options={{ title: 'Credencial deportiva' }} />

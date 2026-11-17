@@ -8,6 +8,8 @@ import { colors, radius } from '../../../shared/theme';
 import type { DetalleAlumno, ModalidadComedor, OpcionesInscripcion } from '../../../shared/types';
 import { SITE_URL } from '../lib/api';
 import { useAction } from '../lib/useData';
+import { PagosAlumnoVista } from './Pagos';
+import type { PagosConfig } from './Pagos';
 import { Badge, Button, Card, Chip, Empty, Feedback, Field, InfoRow, Input, Row, Select, Tabs, styles } from './ui';
 
 export interface Acciones {
@@ -21,7 +23,7 @@ export interface Acciones {
   bajaComedor: (inscripcionId: number) => Promise<unknown>;
 }
 
-type TabKey = 'resumen' | 'academico' | 'deportes' | 'servicios' | 'salud';
+type TabKey = 'resumen' | 'academico' | 'deportes' | 'servicios' | 'salud' | 'pagos';
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: 'resumen', label: 'Resumen' },
@@ -43,7 +45,7 @@ export function confirmar(mensaje: string, accion: () => void) {
   ]);
 }
 
-export function AlumnoVista({ alumno, acciones, onCambio }: { alumno: DetalleAlumno; acciones?: Acciones; onCambio?: () => void }) {
+export function AlumnoVista({ alumno, acciones, onCambio, pagos }: { alumno: DetalleAlumno; acciones?: Acciones; onCambio?: () => void; pagos?: PagosConfig }) {
   const [tab, setTab] = useState<TabKey>('resumen');
   const accion = useAction();
   const ejecutar = async (fn: () => Promise<unknown>, ok: string) => {
@@ -53,13 +55,14 @@ export function AlumnoVista({ alumno, acciones, onCambio }: { alumno: DetalleAlu
 
   return (
     <View style={{ gap: 14 }}>
-      <Tabs tabs={tabs} active={tab} onChange={(k) => { setTab(k); accion.setMessage(null); }} />
+      <Tabs tabs={pagos ? [...tabs, { key: 'pagos', label: 'Pagos' }] : tabs} active={tab} onChange={(k) => { setTab(k); accion.setMessage(null); }} />
       <Feedback message={accion.message} onClose={() => accion.setMessage(null)} />
       {tab === 'resumen' && <Resumen alumno={alumno} />}
       {tab === 'academico' && <Academico {...props} />}
       {tab === 'deportes' && <Deportes {...props} />}
       {tab === 'servicios' && <Servicios {...props} />}
       {tab === 'salud' && <Salud alumno={alumno} />}
+      {tab === 'pagos' && pagos && <PagosAlumnoVista key={alumno.alumno_id} config={pagos} />}
     </View>
   );
 }

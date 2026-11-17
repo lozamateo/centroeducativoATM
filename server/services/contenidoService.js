@@ -84,3 +84,63 @@ export async function cambiarEstadoSolicitud(id, estado) {
   if (!row) throw notFound('Solicitud no encontrada.');
   return row;
 }
+
+// ----- Opiniones (se pueden dejar sin iniciar sesión) -----
+
+const RELACIONES = ['Familia', 'Alumno', 'Ex alumno', 'Docente', 'Visitante'];
+
+export function listarOpiniones({ todas = false } = {}) {
+  return query(
+    `select id, nombre, relacion, comentario, puntaje, visible, created_at from opiniones
+     where $1 or visible order by created_at desc limit 50`,
+    [todas],
+  );
+}
+
+export async function crearOpinion(body) {
+  requireFields(body, ['nombre', 'comentario', 'puntaje']);
+  const puntaje = Number(body.puntaje);
+  if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5) throw badRequest('El puntaje debe ser de 1 a 5 estrellas.');
+  if (body.nombre.length > 80) throw badRequest('El nombre no puede superar los 80 caracteres.');
+  if (body.comentario.length < 5 || body.comentario.length > 600) throw badRequest('La opinión debe tener entre 5 y 600 caracteres.');
+  const relacion = RELACIONES.includes(body.relacion) ? body.relacion : 'Visitante';
+  return queryOne(
+    'insert into opiniones (nombre, relacion, comentario, puntaje) values ($1, $2, $3, $4) returning id, nombre, relacion, comentario, puntaje, created_at',
+    [body.nombre, relacion, body.comentario, puntaje],
+  );
+}
+
+// El administrador puede ocultar opiniones inapropiadas.
+export async function cambiarVisibilidadOpinion(id, visible) {
+  const row = await queryOne('update opiniones set visible = $2 where id = $1 returning *', [id, Boolean(visible)]);
+  if (!row) throw notFound('Opinión no encontrada.');
+  return row;
+}
+
+// ----- Empleo -----
+
+export function listarBusquedas({ todas = false } = {}) {
+  return query('select * from busquedas_laborales where $1 or activa order by area, puesto', [todas]);
+}
+
+export async function postular(body) {
+  requireFields(body, ['nombre', 'email', 'puesto']);
+  checkEmail(body.email);
+  if (body.cv_url && !/^https?:\/\/\S+$/.test(body.cv_url)) throw badRequest('El enlace al CV debe empezar con http:// o https://.');
+  if ((body.mensaje ?? '').length > 2000) throw badRequest('El mensaje no puede superar los 2000 caracteres.');
+  await queryOne(
+    `insert into postulaciones (busqueda_id, nombre, email, telefono, puesto, mensaje, cv_url)
+     values ((select id from busquedas_laborales where id = $1::bigint and activa), $2, $3, $4, $5, $6, $7) returning id`,
+    [Number(body.busqueda_id) || null, body.nombre, body.email, body.telefono || null, body.puesto, body.mensaje || null, body.cv_url || null],
+  );
+  return { mensaje: 'Recibimos tu postulación. Si tu perfil coincide con la búsqueda, te contactaremos.' };
+}
+
+export const listarPostulaciones = () => query('select * from postulaciones order by created_at desc');
+
+export async function cambiarEstadoPostulacion(id, estado) {
+  if (!['Nueva', 'Revisada', 'Entrevista', 'Descartada'].includes(estado)) throw badRequest('Estado inválido.');
+  const row = await queryOne('update postulaciones set estado = $2 where id = $1 returning *', [id, estado]);
+  if (!row) throw notFound('Postulación no encontrada.');
+  return row;
+}

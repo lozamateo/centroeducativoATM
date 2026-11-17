@@ -7,7 +7,7 @@ import { hashPassword } from './authService.js';
 
 // ----- Alumnos -----
 
-const camposAlumno = ['dni', 'nombre', 'apellido', 'fecha_nacimiento', 'genero', 'direccion', 'nivel_id', 'activo'];
+const camposAlumno = ['dni', 'nombre', 'apellido', 'fecha_nacimiento', 'genero', 'direccion', 'telefono', 'email', 'nivel_id', 'activo'];
 
 export function listarAlumnos({ buscar, nivel_id } = {}) {
   return query(
@@ -16,7 +16,7 @@ export function listarAlumnos({ buscar, nivel_id } = {}) {
               where m.alumno_id = a.id and m.estado <> 'Baja' order by m.ciclo_id desc limit 1) as curso
      from alumnos a
      left join niveles_educativos n on n.id = a.nivel_id
-     where ($1::text is null or a.dni like $1 || '%' or (a.apellido || ' ' || a.nombre) ilike '%' || $1 || '%')
+     where ($1::text is null or a.dni like $1 || '%' or a.legajo ilike $1 || '%' or (a.apellido || ' ' || a.nombre) ilike '%' || $1 || '%')
        and ($2::int is null or a.nivel_id = $2)
      order by a.apellido, a.nombre`,
     [buscar || null, nivel_id ?? null],
@@ -40,6 +40,7 @@ export async function obtenerAlumno(id) {
 
 function validarAlumno(body) {
   checkDni(body.dni);
+  checkEmail(body.email);
   checkDate(body.fecha_nacimiento, 'fecha_nacimiento');
 }
 

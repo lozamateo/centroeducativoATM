@@ -70,7 +70,10 @@ function Inscribir({ id }: { id: number }) {
 
   return (
     <DataState loading={detalle.loading && !detalle.data} error={detalle.error} onRetry={detalle.reload}>
-      {detalle.data && <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} />}
+      {detalle.data && <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} pagos={{
+        cargar: (rango) => api.admin.cuentaAlumno(id, rango),
+        comprobante: (comprobanteId) => api.admin.comprobante(comprobanteId),
+      }} />}
     </DataState>
   );
 }

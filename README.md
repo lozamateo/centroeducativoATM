@@ -40,6 +40,8 @@ server/
 supabase/
   schema.sql            esquema completo + datos de prueba (instalación nueva)
   002_tildes.sql        actualización para bases creadas con la primera versión
+  003_datos_demo.sql    datos de demostración para la presentación
+  005_tp_integrador.sql TP integrador v3: pagos por transferencia, facturas, correos, opiniones, empleo, legajos
 shared/                 código común a la web y la app
 src/                    web: sitio público, login, panel por rol
 mobile/                 app móvil (Expo)
@@ -52,6 +54,8 @@ api/index.js            entrada de la API en Vercel
 2. Pegá todo `supabase/schema.sql` y tocá **Run**. Debe responder "Éxito".
 3. Si la base ya se había creado con la primera versión del esquema, ejecutá también `supabase/002_tildes.sql` (corrige
    textos y mensajes; se puede correr más de una vez).
+4. Para el TP integrador completo (pagos, facturas, correos, opiniones, empleo, legajos y horarios), ejecutá
+   `supabase/005_tp_integrador.sql`. Se puede correr más de una vez; si se había ejecutado `004_cuotas.sql`, lo reemplaza.
 
 El esquema crea las tablas de los cuatro dominios del plan (Personas y Seguridad, Estructura Académica, Actividades
 Deportivas, Servicios y Salud), las reglas de negocio como *triggers*, las vistas para los reportes, la tabla de auditoría
@@ -66,6 +70,7 @@ Copiá `.env.example` como `.env` (nunca lo subas a GitHub):
 |---|---|
 | `DATABASE_URL` | Supabase → **Conecta** → **Directo** → *Session pooler*, reemplazando `[YOUR-PASSWORD]` |
 | `JWT_SECRET` | Cualquier texto largo y secreto (obligatorio en producción) |
+| `CRON_SECRET` | Texto secreto para la tarea diaria de Vercel Cron (correos del último día hábil y del día 20). Sin esta variable la tarea no se ejecuta. |
 
 Para la app, copiá `mobile/.env.example` como `mobile/.env`:
 
@@ -125,6 +130,10 @@ enfermería lo renueve.
 | RF-14 y RF-15 Autogestión de familias y docentes | Portal de familias, portal docente y portal del alumno |
 | RF-16 a RF-21 Reportes MIS | Tablero, padrón por curso, padrón de transporte, ocupación de deportes, comedor, ficha 360 (PDF) |
 | RF-22 Ficha médica, apto físico y credencial QR | Enfermería; credencial QR en el portal; verificación pública en `/credencial/:token` |
+| Parte 1: opiniones, galería, empleo, WhatsApp y redes | Sitio público (web y app); moderación en **Sitio web** |
+| Parte 2: legajos, horarios y reportes | Alumnos, Docentes y **Reportes** (por alumno, por docente, por materia, docentes por nivel, alumnos por deporte/nivel/horario/profesor) |
+| Parte 3: pagos (simulados) | Pestaña **Pagos** del alumno (familia paga por transferencia con comprobante; alumno y administración consultan); menú **Pagos** del administrador (facturación, tarifas, reportes y correos) |
+| Parte 3: autenticación | Recuperar contraseña (código por correo simulado) y cambiar contraseña |
 
 ## Reglas de negocio
 
@@ -137,21 +146,28 @@ inscripciones simultáneas:
 - **Una matrícula** por alumno y ciclo lectivo, con control de vacantes; al matricular se asignan las materias del curso.
 - Una inscripción activa al comedor por ciclo.
 - Cada alta, modificación o baja queda en la **auditoría** con usuario y fecha.
+- **Pagos (Parte 3)**: cada mes se genera una factura por alumno con sus ítems: cuota ($ 40.000, o $ 30.000 por hijo si el
+  grupo familiar tiene 2 o más), cada deporte y cada recorrido (valores diferenciados) y el comedor. El administrador solo
+  define los valores. La familia elige los ítems a pagar, informa la transferencia y **adjunta el comprobante** (una factura
+  puede tener varios); el sistema emite el comprobante de pago. **No se aceptan pagos en efectivo.** Se paga del 1 al 15.
+- **Correos**: el último día hábil se envía el total del mes siguiente con su composición y las facturas; el día 20, la deuda.
+  Es una bandeja simulada (sin mails reales). Lógica en `server/rules/facturacion.js` (con pruebas unitarias).
 
 ## Endpoints principales
 
 ```
 POST /api/auth/login                      GET  /api/auth/me
 GET  /api/niveles | noticias | deportes | recorridos
-POST /api/contacto | solicitudes          GET  /api/credencial/:token
+POST /api/contacto | solicitudes | opiniones | postulaciones   GET /api/credencial/:token
+POST /api/auth/recuperar | restablecer | cambiar-password      GET /api/cron/diario (Vercel Cron)
 
-/api/portal/familia/hijos[/:id[/opciones|/matricula|/deportes|/transporte|/comedor]]   (rol TUTOR)
+/api/portal/familia/hijos[/:id[/opciones|/matricula|/deportes|/transporte|/comedor|/cuenta|/facturas/:f/pagos]] (rol TUTOR)
 /api/portal/docente                                                                      (rol DOCENTE)
-/api/portal/alumno                                                                       (rol ALUMNO)
+/api/portal/alumno[/cuenta]                                                              (rol ALUMNO)
 /api/salud/fichas[/:alumnoId]                                                            (rol ENFERMERIA)
 /api/admin/{alumnos,tutores,profesores,cursos,materias,deportes,comisiones,
             matriculas,inscripciones-deporte,transporte,comedor,usuarios,
-            noticias,mensajes,solicitudes,reportes/*}                                    (rol ADMIN)
+            noticias,mensajes,solicitudes,reportes/*,tarifas,facturacion,notificaciones}  (rol ADMIN)
 ```
 
 ## Validación

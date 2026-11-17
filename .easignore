@@ -1,0 +1,10 @@
+# Archivos que EAS Build no sube a la nube al compilar la app (la app usa mobile/ y shared/).
+node_modules/
+dist/
+coverage/
+entregas/
+cypress/
+.git/
+.vercel/
+.env*
+!.env.example

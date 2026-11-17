@@ -23,7 +23,9 @@ const alumnoFields: FieldConfig[] = [
   { name: 'apellido', label: 'Apellido', required: true },
   { name: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true },
   { name: 'genero', label: 'Genero', type: 'select', options: ['Femenino', 'Masculino', 'Otro'].map((g) => ({ value: g, label: g })) },
-  { name: 'direccion', label: 'Dirección', full: true },
+  { name: 'direccion', label: 'Domicilio', full: true },
+  { name: 'telefono', label: 'Teléfono', type: 'tel' },
+  { name: 'email', label: 'Correo electrónico', type: 'email' },
   { name: 'activo', label: 'Alumno activo', type: 'checkbox' },
 ];
 
@@ -61,6 +63,7 @@ export function AlumnosPage() {
       <DataState loading={loading} error={error} onRetry={reload}>
         <Card>
           <Table rows={data ?? []} rowKey={(a) => a.id} columns={[
+            { header: 'Legajo', render: (a) => a.legajo },
             { header: 'Alumno', render: (a) => <button className="link" onClick={() => setDetalle(a.id)}>{a.apellido}, {a.nombre}</button> },
             { header: 'DNI', render: (a) => a.dni },
             { header: 'Edad', render: (a) => `${edad(a.fecha_nacimiento)} años` },
@@ -229,6 +232,7 @@ export function DocentesPage() {
       <DataState loading={loading} error={error} onRetry={reload}>
         <Card>
           <Table rows={data ?? []} rowKey={(p) => p.id} columns={[
+            { header: 'Legajo', render: (p) => p.legajo },
             { header: 'Docente', render: (p) => `${p.apellido}, ${p.nombre}` },
             { header: 'DNI', render: (p) => p.dni },
             { header: 'Especialidad', render: (p) => p.especialidad ?? '-' },

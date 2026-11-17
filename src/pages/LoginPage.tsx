@@ -4,6 +4,7 @@ import { ArrowLeft, LogIn } from 'lucide-react';
 import { ROLES } from '../../shared/format';
 import type { Rol } from '../../shared/types';
 import { Logo } from '../components/Logo';
+import { RecuperarPasswordModal } from '../components/Password';
 import { Alert, Button, Field, Input } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import { Link, navigate } from '../lib/router';
@@ -23,6 +24,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [recuperar, setRecuperar] = useState(false);
 
   useEffect(() => {
     if (usuario) navigate('/panel', { replace: true });
@@ -54,7 +56,9 @@ export function LoginPage() {
           <Field label="Email"><Input type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
           <Field label="Contraseña"><Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
           <Button type="submit" loading={busy} icon={<LogIn size={18} />} className="btn-block">Ingresar</Button>
+          <button type="button" className="link-button" onClick={() => setRecuperar(true)}>¿Olvidaste tu contraseña?</button>
         </form>
+        {recuperar && <RecuperarPasswordModal emailInicial={email} onClose={() => setRecuperar(false)} />}
 
         <div className="demo-users">
           <span>Usuarios de demostración</span>

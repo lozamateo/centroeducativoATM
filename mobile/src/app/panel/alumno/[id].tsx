@@ -78,7 +78,7 @@ export default function AlumnoAdmin() {
               </>
             ) : (
               <DataState loading={detalle.loading && !detalle.data} error={detalle.error} onRetry={detalle.reload}>
-                {detalle.data && <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} />}
+                {detalle.data && <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} pagos={{ cargar: (rango) => api.admin.cuentaAlumno(id, rango) }} />}
               </DataState>
             )}
             <FormSheet title="Editar alumno" visible={editar} fields={alumnoFields} initial={a} onClose={() => setEditar(false)}

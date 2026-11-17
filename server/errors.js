@@ -20,6 +20,7 @@ const uniqueMessages = {
   tutores_dni_key: 'Ya existe un tutor con ese DNI.',
   profesores_dni_key: 'Ya existe un profesor con ese DNI.',
   alumnos_tutores_pkey: 'El tutor ya está vinculado a este alumno.',
+  pagos_cuotas_alumno_id_periodo_key: 'Esa cuota ya está pagada.',
 };
 
 export function toHttpError(error) {
