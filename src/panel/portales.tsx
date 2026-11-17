@@ -1,10 +1,14 @@
 // Portales de autogestion: familia, alumno y docente.
-import { ArrowLeft, ChevronRight, Users } from 'lucide-react';
-import { horarios, tonoApto } from '../../shared/format';
+import { useState } from 'react';
+import { ArrowLeft, ChevronRight, Mail, Users } from 'lucide-react';
+import { fechaHora, horarios, tonoApto } from '../../shared/format';
+import type { Notificacion } from '../../shared/types';
 import { Badge, Card, DataState, Empty, PageHeader, Table } from '../components/ui';
 import { api } from '../lib/api';
 import { Link } from '../lib/router';
-import { useData } from '../lib/useData';
+import { facturaPdf } from '../lib/pdf';
+import { useAction, useData } from '../lib/useData';
+import { CorreoModal } from './admin/Pagos';
 import { AlumnoVista } from './comun/AlumnoVista';
 import type { AccionesFamilia } from './comun/AlumnoVista';
 
@@ -36,7 +40,29 @@ export function FamiliaInicio() {
           <Empty texto="No hay alumnos vinculados a tu cuenta. Comunicate con secretaría." />
         )}
       </DataState>
+      <CorreosFamilia />
     </>
+  );
+}
+
+// Correos que el sistema envió a la familia (recordatorio de pago y aviso de deuda; simulados).
+function CorreosFamilia() {
+  const { data } = useData(() => api.familia.correos());
+  const [abierto, setAbierto] = useState<Notificacion | null>(null);
+  const accion = useAction();
+  if (!data?.length) return null;
+  return (
+    <Card title="Correos recibidos">
+      <ul className="item-list">
+        {data.slice(0, 8).map((n) => (
+          <li key={n.id}>
+            <div><button className="link-button" onClick={() => setAbierto(n)}><Mail size={15} /> {n.asunto}</button><small>{n.tipo} · {fechaHora(n.enviado_en)}</small></div>
+            <Badge tone={n.tipo === 'Aviso de deuda' ? 'danger' : 'info'}>{n.tipo}</Badge>
+          </li>
+        ))}
+      </ul>
+      {abierto && <CorreoModal correo={abierto} onClose={() => setAbierto(null)} descargar={(id) => accion.run(async () => facturaPdf(await api.familia.factura(id)))} />}
+    </Card>
   );
 }
 
@@ -66,10 +92,10 @@ export function FamiliaHijo({ id }: { id: number }) {
         {detalle.data && (
           <>
             <PageHeader title={detalle.data.alumno} subtitle={`${detalle.data.nivel ?? ''} · ${detalle.data.curso ?? 'Sin matricula'}`} />
-            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} cuotas={{
-              modo: 'familia',
-              cargar: () => api.familia.cuotas(id),
-              pagar: (periodo, metodo) => api.familia.pagarCuota(id, periodo, metodo),
+            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} pagos={{
+              cargar: (rango) => api.familia.cuenta(id, rango),
+              comprobante: (comprobanteId) => api.familia.comprobante(id, comprobanteId),
+              pagar: (facturaId, body) => api.familia.pagar(id, facturaId, body),
             }} />
           </>
         )}
@@ -85,7 +111,7 @@ export function AlumnoInicio() {
       {data && (
         <>
           <PageHeader title={`Hola, ${data.alumno.split(', ')[1] ?? data.alumno}`} subtitle={`${data.nivel ?? ''} · ${data.curso ?? 'Sin matricula'}`} />
-          <AlumnoVista alumno={data} cuotas={{ modo: 'lectura', cargar: () => api.cuotasAlumnoPropio() }} />
+          <AlumnoVista alumno={data} pagos={{ cargar: (rango) => api.cuentaAlumnoPropio(rango) }} />
         </>
       )}
     </DataState>

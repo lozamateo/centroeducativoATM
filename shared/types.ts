@@ -78,6 +78,7 @@ export interface Profesor {
   telefono: string | null;
   especialidad: string | null;
   fecha_ingreso: string | null;
+  legajo?: string;
   activo: boolean;
   materias_asignadas?: number;
   comisiones_a_cargo?: number;
@@ -108,6 +109,9 @@ export interface Alumno {
   fecha_nacimiento: string;
   genero: string | null;
   direccion: string | null;
+  telefono?: string | null;
+  email?: string | null;
+  legajo?: string;
   nivel_id: number | null;
   nivel: string | null;
   curso?: string | null;
@@ -348,6 +352,9 @@ export interface PadronCursoFila {
   dni: string;
   estado: string;
   comprobante: string;
+  legajo: string;
+  apellido: string;
+  nombre: string;
 }
 
 export interface PadronTransporteFila {
@@ -449,48 +456,217 @@ export interface MensajeOk {
   mensaje: string;
 }
 
-// ----- Cuotas (pago simulado, trabajo académico) -----
+// ----- Pagos (Parte 3). Simulación para el trabajo práctico: no hay dinero real. -----
 
-export type EstadoCuota = 'Pagada' | 'En término' | 'Vencida' | 'Próxima';
-export type MetodoPago = 'Efectivo' | 'Transferencia';
+export type EstadoFactura = 'Pagada' | 'Pago incompleto' | 'Pago incompleto (vencida)' | 'Pendiente' | 'Vencida';
+export type TipoItem = 'Cuota' | 'Deporte' | 'Transporte' | 'Comedor';
 
-export interface Cuota {
+export interface FacturaItem {
+  id: number;
+  tipo: TipoItem;
+  descripcion: string;
+  importe: number;
+  pago_id: number | null;
+}
+
+export interface ComprobanteInfo {
+  id: number;
+  nombre_archivo: string;
+  tipo_mime: string;
+  tamano: number;
+  created_at: string;
+}
+
+export interface Pago {
+  id: number;
+  numero: string;
+  importe: number;
+  metodo: 'Transferencia';
+  numero_operacion: string;
+  fecha_transferencia: string;
+  fecha: string;
+  registrado_por: string | null;
+  items: string[];
+  comprobantes: ComprobanteInfo[];
+}
+
+export interface Factura {
+  id: number;
+  numero: string;
+  alumno_id: number;
+  alumno: string;
+  legajo: string;
+  periodo: string;
+  mes: string;
+  fecha_emision: string;
+  vence: string;
+  total: number;
+  pagado: number;
+  saldo: number;
+  estado: EstadoFactura;
+  items: FacturaItem[];
+  pagos?: Pago[];
+  tutor?: string | null;
+  tutor_dni?: string | null;
+}
+
+export interface ItemDeuda {
+  id: number;
+  tipo: TipoItem;
+  descripcion: string;
+  importe: number;
+  factura_id: number;
+  factura: string;
   periodo: string;
   mes: string;
   vence: string;
-  importe: number;
-  estado: EstadoCuota;
-  se_puede_pagar: boolean;
-  pago: { id: number; metodo: MetodoPago; fecha: string; comprobante: string; registrado_por: string | null } | null;
+  vencido: boolean;
 }
 
-export interface CuotasAlumno {
+export interface CuentaAlumno {
   alumno_id: number;
   alumno: string;
+  legajo: string;
   hijos_en_el_colegio: number;
-  importe_mensual: number;
   descuento_hermanos: boolean;
-  adeuda_desde: string | null;
-  cuotas_vencidas: number;
-  total_adeudado: number;
-  pagadas: number;
-  cuotas: Cuota[];
+  metodo_pago: 'Transferencia';
+  deuda: {
+    total_adeudado: number;
+    a_vencer: number;
+    adeuda_desde: string | null;
+    por_tipo: { tipo: TipoItem; total: number }[];
+    items: ItemDeuda[];
+  };
+  facturas: Factura[];
 }
 
-export interface PanelCuotas {
+export interface ComprobanteArchivo {
+  nombre_archivo: string;
+  tipo_mime: string;
+  contenido: string;
+}
+
+export interface PagoRegistrado {
+  id: number;
+  numero: string;
+  recibo: string;
+  factura: string;
+  importe: number;
+  metodo: 'Transferencia';
+  fecha: string;
+}
+
+export interface Tarifas {
+  generales: { clave: string; descripcion: string; importe: number; updated_at: string }[];
+  deportes: { id: number; nombre: string; precio_mensual: number; profesor_responsable: string | null }[];
+  recorridos: { id: number; nombre: string; zona: string; precio_mensual: number }[];
+}
+
+export interface PanelFacturacion {
   hoy: string;
-  periodos: { periodo: string; mes: string }[];
-  resumen: { alumnos: number; al_dia: number; con_deuda: number; total_adeudado: number; cobrado_mes_actual: number; cobrado_total: number };
-  filas: {
-    alumno_id: number;
-    alumno: string;
-    dni: string;
-    nivel: string | null;
-    curso: string | null;
-    importe_mensual: number;
-    adeuda_desde: string | null;
-    cuotas_vencidas: number;
-    total_adeudado: number;
-    meses: { periodo: string; estado: EstadoCuota }[];
+  periodo: string;
+  periodos: string[];
+  resumen: { facturado: number; cobrado: number; pagadas: number; incompletas: number; impagas: number; deuda_vencida: number };
+  facturas: Factura[];
+  deudores: { alumno_id: number; alumno: string; legajo: string; nivel: string | null; adeuda_desde: string; adeuda_desde_mes: string; total_adeudado: number; facturas: number }[];
+}
+
+export interface ReporteIngresos {
+  total: number;
+  por_mes: { periodo: string; mes: string; total: number }[];
+  detalle: { id: number; recibo: string; fecha_transferencia: string; numero_operacion: string; importe: number; factura: string; periodo: string; alumno: string; legajo: string }[];
+}
+
+export interface ReportePagosEstado {
+  cantidad: number;
+  anios: {
+    anio: string; total: number; pagado: number; saldo: number;
+    alumnos: {
+      alumno_id: number; alumno: string; legajo: string; total: number; pagado: number; saldo: number;
+      facturas: { numero: string; periodo: string; mes: string; total: number; pagado: number; saldo: number; estado: EstadoFactura }[];
+    }[];
   }[];
+}
+
+export interface PagoServicioFila {
+  id: number;
+  deporte?: string;
+  comision?: string;
+  nivel?: string;
+  horario?: string | null;
+  profesor?: string;
+  recorrido_id?: number;
+  recorrido?: string;
+  zona?: string;
+  alumno: string;
+  legajo: string;
+  periodo: string;
+  factura: string;
+  importe: number;
+  pagado: boolean;
+  recibo: string | null;
+}
+
+export interface Notificacion {
+  id: number;
+  tipo: 'Recordatorio de pago' | 'Aviso de deuda' | 'Recuperar contraseña';
+  periodo: string | null;
+  destinatario_nombre?: string;
+  destinatario_email?: string;
+  asunto: string;
+  cuerpo: string;
+  factura_ids: number[];
+  total: number | null;
+  enviado_en: string;
+}
+
+export interface ResultadoTareas {
+  fecha: string;
+  resultados: { tipo: string; periodo: string; enviados: number }[];
+  mensaje: string | null;
+}
+
+// ----- Parte 1: opiniones y empleo -----
+
+export interface Opinion {
+  id: number;
+  nombre: string;
+  relacion: string;
+  comentario: string;
+  puntaje: number;
+  visible?: boolean;
+  created_at: string;
+}
+
+export interface BusquedaLaboral {
+  id: number;
+  puesto: string;
+  area: string;
+  descripcion: string;
+  modalidad: string;
+}
+
+export interface Postulacion {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string | null;
+  puesto: string;
+  mensaje: string | null;
+  cv_url: string | null;
+  estado: 'Nueva' | 'Revisada' | 'Entrevista' | 'Descartada';
+  created_at: string;
+}
+
+// ----- Parte 2: reportes -----
+
+export interface ReporteDocenteFila { profesor_id: number; legajo: string; profesor: string; nivel: string; curso: string; materia: string; horario: string | null }
+export interface ReporteAlumnoMateriaFila { nivel: string; curso: string; materia: string; profesor: string; alumno: string; legajo: string }
+export interface ReporteDocenteNivelFila { nivel: string; legajo: string; profesor: string; materias: string; cursos: string }
+export interface ReporteAlumnoDeporteFila { deporte: string; comision: string; nivel: string; horario: string | null; profesor: string; alumno: string; legajo: string; curso: string | null }
+export interface ReportePorAlumno {
+  alumno_id: number; legajo: string; alumno: string; dni: string; nivel: string | null; curso: string | null;
+  transporte: string | null; comedor: string | null;
+  materias: { materia: string; profesor: string; horario: string | null }[];
+  deportes: { deporte: string; comision: string; horario: string | null; profesor: string }[];
 }

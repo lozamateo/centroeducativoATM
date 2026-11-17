@@ -11,7 +11,8 @@ import saludRoutes from './routes/salud.js';
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+// 4 MB: alcanza para el comprobante de transferencia (hasta 2 MB) codificado en base64.
+app.use(express.json({ limit: '4mb' }));
 
 app.use('/api', publicoRoutes);
 app.use('/api/admin', adminRoutes);

@@ -9,5 +9,11 @@
       "source": "/:path*",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/diario",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

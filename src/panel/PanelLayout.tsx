@@ -2,11 +2,12 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   BarChart3, BookOpen, ClipboardList, Dumbbell, FileClock, GraduationCap, HeartPulse, Home, LayoutDashboard, LogOut,
-  Menu, Newspaper, ShieldCheck, UserCog, Users, Wallet, X,
+  KeyRound, Menu, Newspaper, ShieldCheck, UserCog, Users, Wallet, X,
 } from 'lucide-react';
 import { ROLES } from '../../shared/format';
 import type { Rol } from '../../shared/types';
 import { Logo } from '../components/Logo';
+import { CambiarPasswordModal } from '../components/Password';
 import { useAuth } from '../lib/auth';
 import { Link } from '../lib/router';
 
@@ -25,7 +26,7 @@ export const navPorRol: Record<Rol, NavItem[]> = {
     { href: '/panel/cursos', label: 'Cursos y materias', icon: <BookOpen size={18} /> },
     { href: '/panel/deportes', label: 'Deportes', icon: <Dumbbell size={18} /> },
     { href: '/panel/inscripciones', label: 'Inscripciones', icon: <ClipboardList size={18} /> },
-    { href: '/panel/cuotas', label: 'Cuotas', icon: <Wallet size={18} /> },
+    { href: '/panel/pagos', label: 'Pagos', icon: <Wallet size={18} /> },
     { href: '/panel/reportes', label: 'Reportes', icon: <BarChart3 size={18} /> },
     { href: '/panel/salud', label: 'Aptos físicos', icon: <HeartPulse size={18} /> },
     { href: '/panel/usuarios', label: 'Usuarios', icon: <ShieldCheck size={18} /> },
@@ -41,6 +42,7 @@ export const navPorRol: Record<Rol, NavItem[]> = {
 export function PanelLayout({ path, children }: { path: string; children: ReactNode }) {
   const { usuario, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [clave, setClave] = useState(false);
   if (!usuario) return null;
 
   const items = navPorRol[usuario.rol];
@@ -62,6 +64,7 @@ export function PanelLayout({ path, children }: { path: string; children: ReactN
         </nav>
         <div className="sidebar-footer">
           <Link href="/"><Home size={18} /> Sitio público</Link>
+          <button onClick={() => setClave(true)}><KeyRound size={18} /> Cambiar contraseña</button>
           <button onClick={logout}><LogOut size={18} /> Cerrar sesión</button>
         </div>
       </aside>
@@ -78,6 +81,7 @@ export function PanelLayout({ path, children }: { path: string; children: ReactN
           </div>
         </header>
         <main className="panel-content">{children}</main>
+        {clave && <CambiarPasswordModal onClose={() => setClave(false)} />}
       </div>
     </div>
   );

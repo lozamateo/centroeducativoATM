@@ -94,6 +94,8 @@ export async function docente(usuarioId) {
   const [materias, comisiones] = await Promise.all([
     query(
       `select cm.id, ma.nombre as materia, n.nombre || ' - ' || c.anio || ' ' || c.division as curso, c.id as curso_id,
+              coalesce((select json_agg(json_build_object('dia_semana', h.dia_semana, 'hora_inicio', h.hora_inicio, 'hora_fin', h.hora_fin)
+                                 order by h.dia_semana, h.hora_inicio) from horarios_materia h where h.curso_materia_id = cm.id), '[]') as horarios,
               coalesce((select json_agg(json_build_object('alumno', a.apellido || ', ' || a.nombre, 'dni', a.dni) order by a.apellido)
                           from matriculas m join alumnos a on a.id = m.alumno_id
                          where m.curso_id = c.id and m.estado <> 'Baja'), '[]') as alumnos

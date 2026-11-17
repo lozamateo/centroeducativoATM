@@ -9,7 +9,7 @@ import { ReportesPage } from './admin/Reportes';
 import { AuditoriaPage, ContenidoPage, UsuariosPage } from './admin/Sistema';
 import { Tablero } from './admin/Tablero';
 import { FichaEditor, FichasLista } from './enfermeria/Enfermeria';
-import { CuotasPage } from './comun/Cuotas';
+import { PagosPage } from './admin/Pagos';
 import { AlumnoInicio, DocenteInicio, FamiliaHijo, FamiliaInicio } from './portales';
 
 const adminRutas: Record<string, ComponentType> = {
@@ -20,7 +20,7 @@ const adminRutas: Record<string, ComponentType> = {
   '/panel/cursos': CursosPage,
   '/panel/deportes': DeportesPage,
   '/panel/inscripciones': InscripcionesPage,
-  '/panel/cuotas': CuotasPage,
+  '/panel/pagos': PagosPage,
   '/panel/reportes': ReportesPage,
   '/panel/salud': () => <FichasLista soloLectura />,
   '/panel/usuarios': UsuariosPage,

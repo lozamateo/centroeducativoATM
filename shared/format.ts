@@ -62,7 +62,27 @@ export const mesCorto = (periodo: string) => {
   return `${nombres[Number(mes) - 1]} ${anio.slice(2)}`;
 };
 
-export const tonoCuota = { Pagada: 'success', 'En término': 'info', Vencida: 'danger', 'Próxima': 'neutral' } as const;
+export const tonoFactura = {
+  Pagada: 'success',
+  'Pago incompleto': 'warning',
+  'Pago incompleto (vencida)': 'danger',
+  Pendiente: 'info',
+  Vencida: 'danger',
+} as const;
+
+export const nombreMes = (periodo: string) => {
+  const nombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const [anio, mes] = periodo.split('-');
+  return `${nombres[Number(mes) - 1]} ${anio}`;
+};
 
 // Datos bancarios de ejemplo: el pago es una simulación para el trabajo práctico.
 export const DATOS_TRANSFERENCIA = { alias: 'EDUCAR.TRANSFORMAR.CUOTAS', cbu: '0000003100099999999999', titular: 'Centro Educativo Educar para Transformar (ficticio)' };
+
+// Contacto y redes (ficticios).
+export const CONTACTO = {
+  whatsapp: '5493624445555',
+  whatsappTexto: '+54 9 362 444-5555',
+  instagram: 'https://www.instagram.com/educarparatransformar',
+  facebook: 'https://www.facebook.com/educarparatransformar',
+};

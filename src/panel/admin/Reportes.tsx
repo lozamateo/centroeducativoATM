@@ -7,7 +7,7 @@ import { api } from '../../lib/api';
 import { exportarPdf } from '../../lib/pdf';
 import { useData } from '../../lib/useData';
 
-type TabKey = 'transporte' | 'curso' | 'deportes' | 'comedor' | 'alumno';
+type TabKey = 'transporte' | 'curso' | 'deportes' | 'comedor' | 'alumno' | 'por-alumno' | 'docente' | 'materia' | 'docentes-nivel' | 'alumnos-deporte';
 
 export function ReportesPage() {
   const [tab, setTab] = useState<TabKey>('transporte');
@@ -20,12 +20,22 @@ export function ReportesPage() {
         { key: 'deportes', label: 'Ocupación de deportes' },
         { key: 'comedor', label: 'Comedor' },
         { key: 'alumno', label: 'Ficha 360 del alumno' },
+        { key: 'por-alumno', label: 'Por alumno' },
+        { key: 'docente', label: 'Por docente' },
+        { key: 'materia', label: 'Alumnos por materia' },
+        { key: 'docentes-nivel', label: 'Docentes por nivel' },
+        { key: 'alumnos-deporte', label: 'Alumnos por deporte' },
       ]} />
       {tab === 'transporte' && <PadrónTransporte />}
       {tab === 'curso' && <PadrónCurso />}
       {tab === 'deportes' && <OcupacionDeportes />}
       {tab === 'comedor' && <Comedor />}
       {tab === 'alumno' && <Ficha360 />}
+      {tab === 'por-alumno' && <PorAlumno />}
+      {tab === 'docente' && <PorDocente />}
+      {tab === 'materia' && <AlumnosPorMateria />}
+      {tab === 'docentes-nivel' && <DocentesPorNivel />}
+      {tab === 'alumnos-deporte' && <AlumnosPorDeporte />}
     </>
   );
 }
@@ -88,8 +98,8 @@ function PadrónCurso() {
         </Select>
         <BotonPdf disabled={!data?.length} onClick={() => exportarPdf({
           titulo: `Padrón por curso - ${nombre}`,
-          columnas: ['Nivel', 'Curso', 'Alumno', 'DNI', 'Comprobante'],
-          filas: (data ?? []).map((f) => [f.nivel, f.curso, f.alumno, f.dni, f.comprobante]),
+          columnas: ['Nivel', 'Curso', 'Legajo', 'Apellido', 'Nombre', 'DNI'],
+          filas: (data ?? []).map((f) => [f.nivel, f.curso, f.legajo, f.apellido, f.nombre, f.dni]),
           archivo: 'padron-curso',
         })} />
       </>
@@ -98,9 +108,10 @@ function PadrónCurso() {
         <Table rows={data ?? []} rowKey={(f) => `${f.curso_id}-${f.alumno_id}`} empty="Sin alumnos matriculados." columns={[
           { header: 'Nivel', render: (f) => f.nivel },
           { header: 'Curso', render: (f) => f.curso },
-          { header: 'Alumno', render: (f) => f.alumno },
+          { header: 'Legajo', render: (f) => f.legajo },
+          { header: 'Apellido', render: (f) => f.apellido },
+          { header: 'Nombre', render: (f) => f.nombre },
           { header: 'DNI', render: (f) => f.dni },
-          { header: 'Comprobante', render: (f) => f.comprobante },
         ]} />
       </DataState>
     </Card>
@@ -217,5 +228,189 @@ function Ficha360() {
         )}
       </div>
     </DataState>
+  );
+}
+
+// ----- Reportes de la Parte 2 del TP integrador -----
+
+function Opciones({ label, value, onChange, opciones, todos = 'Todos' }: { label: string; value: string; onChange: (v: string) => void; opciones: { id: number; nombre: string }[]; todos?: string }) {
+  return (
+    <Field label={label}>
+      <Select value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{todos}</option>
+        {opciones.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+      </Select>
+    </Field>
+  );
+}
+
+const nombreProfesor = (p: { id: number; apellido: string; nombre: string }) => ({ id: p.id, nombre: `${p.apellido}, ${p.nombre}` });
+
+// Por alumno: curso, materias, profesores de cada materia, deportes con horarios, transporte y comedor.
+function PorAlumno() {
+  const alumnos = useData(() => api.admin.alumnos());
+  const [id, setId] = useState('');
+  const { data, loading, error } = useData(() => (id ? api.admin.reportePorAlumno(Number(id)) : Promise.resolve(null)), [id]);
+  return (
+    <div className="stack">
+      <Card>
+        <Opciones label="Alumno" value={id} onChange={setId} todos="Seleccionar alumno"
+          opciones={(alumnos.data ?? []).map((a) => ({ id: a.id, nombre: `${a.apellido}, ${a.nombre} (${a.legajo ?? a.dni})` }))} />
+      </Card>
+      {id && (
+        <DataState loading={loading} error={error}>
+          {data && (
+            <Card title={`${data.alumno} · Legajo ${data.legajo}`} actions={<BotonPdf onClick={() => exportarPdf({
+              titulo: `Reporte por alumno - ${data.alumno}`, subtitulo: `Legajo ${data.legajo} · ${data.nivel ?? ''} ${data.curso ?? ''}`,
+              columnas: ['Tipo', 'Detalle', 'Profesor', 'Horario'],
+              filas: [
+                ['Curso', `${data.nivel ?? ''} ${data.curso ?? 'Sin matrícula'}`, '', ''],
+                ...data.materias.map((m) => ['Materia', m.materia, m.profesor, m.horario]),
+                ...data.deportes.map((d) => ['Deporte', `${d.deporte} (${d.comision})`, d.profesor, d.horario]),
+                ['Transporte', data.transporte ?? 'No usa', '', ''],
+                ['Comedor', data.comedor ?? 'No usa', '', ''],
+              ],
+              archivo: `reporte-alumno-${data.legajo}`,
+            })} />}>
+              <div className="info-list two-cols">
+                <InfoRow label="Curso">{`${data.nivel ?? ''} ${data.curso ?? 'Sin matrícula'}`}</InfoRow>
+                <InfoRow label="Transporte">{data.transporte ?? 'No usa'}</InfoRow>
+                <InfoRow label="Comedor">{data.comedor ?? 'No usa'}</InfoRow>
+                <InfoRow label="DNI">{data.dni}</InfoRow>
+              </div>
+              <h3 className="grupo-titulo">Materias y profesores</h3>
+              <Table rows={data.materias} rowKey={(m) => m.materia} empty="Sin matrícula." columns={[
+                { header: 'Materia', render: (m) => m.materia },
+                { header: 'Profesor', render: (m) => m.profesor },
+                { header: 'Horario', render: (m) => m.horario },
+              ]} />
+              <h3 className="grupo-titulo">Deportes y horarios</h3>
+              <Table rows={data.deportes} rowKey={(d) => d.comision + d.deporte} empty="No participa en deportes." columns={[
+                { header: 'Deporte', render: (d) => `${d.deporte} (${d.comision})` },
+                { header: 'Horario', render: (d) => d.horario },
+                { header: 'Profesor', render: (d) => d.profesor },
+              ]} />
+            </Card>
+          )}
+        </DataState>
+      )}
+    </div>
+  );
+}
+
+// Por docente: cursos a cargo por nivel y horarios de cada curso.
+function PorDocente() {
+  const profesores = useData(() => api.admin.profesores());
+  const [id, setId] = useState('');
+  const { data, loading, error, reload } = useData(() => api.admin.reporteDocentes(Number(id) || undefined), [id]);
+  const filas = data ?? [];
+  return (
+    <Card title="Cursos a cargo por nivel y horarios" actions={<BotonPdf disabled={!filas.length} onClick={() => exportarPdf({
+      titulo: 'Reporte por docente', columnas: ['Legajo', 'Profesor', 'Nivel', 'Curso', 'Materia', 'Horario'],
+      filas: filas.map((f) => [f.legajo, f.profesor, f.nivel, f.curso, f.materia, f.horario]), archivo: 'reporte-docentes',
+    })} />}>
+      <div className="inline-form"><Opciones label="Docente" value={id} onChange={setId} opciones={(profesores.data ?? []).map(nombreProfesor)} /></div>
+      <DataState loading={loading} error={error} onRetry={reload}>
+        <Table rows={filas} rowKey={(f) => `${f.profesor_id}-${f.curso}-${f.materia}`} empty="Sin cursos a cargo." columns={[
+          { header: 'Profesor', render: (f) => `${f.profesor} (${f.legajo})` },
+          { header: 'Nivel', render: (f) => f.nivel },
+          { header: 'Curso', render: (f) => f.curso },
+          { header: 'Materia', render: (f) => f.materia },
+          { header: 'Horario', render: (f) => f.horario },
+        ]} />
+      </DataState>
+    </Card>
+  );
+}
+
+function AlumnosPorMateria() {
+  const materias = useData(() => api.admin.materias());
+  const cursos = useData(() => api.admin.cursos());
+  const [materia, setMateria] = useState('');
+  const [curso, setCurso] = useState('');
+  const { data, loading, error, reload } = useData(
+    () => api.admin.reporteAlumnosMateria({ materia_id: Number(materia) || undefined, curso_id: Number(curso) || undefined }),
+    [materia, curso],
+  );
+  const filas = data ?? [];
+  return (
+    <Card title="Listado de alumnos por materia" actions={<BotonPdf disabled={!filas.length} onClick={() => exportarPdf({
+      titulo: 'Alumnos por materia', columnas: ['Nivel', 'Curso', 'Materia', 'Profesor a cargo', 'Alumno', 'Legajo'],
+      filas: filas.map((f) => [f.nivel, f.curso, f.materia, f.profesor, f.alumno, f.legajo]), archivo: 'alumnos-por-materia',
+    })} />}>
+      <div className="inline-form">
+        <Opciones label="Materia" value={materia} onChange={setMateria} opciones={(materias.data ?? []).map((m) => ({ id: m.id, nombre: `${m.nombre} (${m.nivel})` }))} />
+        <Opciones label="Curso" value={curso} onChange={setCurso} opciones={(cursos.data ?? []).map((c) => ({ id: c.id, nombre: `${c.nivel} - ${c.anio} ${c.division}` }))} />
+      </div>
+      <DataState loading={loading} error={error} onRetry={reload}>
+        <Table rows={filas} rowKey={(f) => `${f.curso}-${f.materia}-${f.legajo}`} empty="Sin alumnos." columns={[
+          { header: 'Nivel', render: (f) => f.nivel },
+          { header: 'Curso', render: (f) => f.curso },
+          { header: 'Materia', render: (f) => f.materia },
+          { header: 'Profesor a cargo', render: (f) => f.profesor },
+          { header: 'Alumno', render: (f) => f.alumno },
+          { header: 'Legajo', render: (f) => f.legajo },
+        ]} />
+      </DataState>
+    </Card>
+  );
+}
+
+function DocentesPorNivel() {
+  const niveles = useData(() => api.niveles());
+  const [nivel, setNivel] = useState('');
+  const { data, loading, error, reload } = useData(() => api.admin.reporteDocentesNivel(Number(nivel) || undefined), [nivel]);
+  const filas = data ?? [];
+  return (
+    <Card title="Listado de docentes por nivel educativo" actions={<BotonPdf disabled={!filas.length} onClick={() => exportarPdf({
+      titulo: 'Docentes por nivel educativo', columnas: ['Nivel', 'Legajo', 'Profesor', 'Materias a cargo', 'Cursos'],
+      filas: filas.map((f) => [f.nivel, f.legajo, f.profesor, f.materias, f.cursos]), archivo: 'docentes-por-nivel',
+    })} />}>
+      <div className="inline-form"><Opciones label="Nivel" value={nivel} onChange={setNivel} opciones={niveles.data ?? []} /></div>
+      <DataState loading={loading} error={error} onRetry={reload}>
+        <Table rows={filas} rowKey={(f) => `${f.nivel}-${f.legajo}`} columns={[
+          { header: 'Nivel', render: (f) => f.nivel },
+          { header: 'Profesor', render: (f) => `${f.profesor} (${f.legajo})` },
+          { header: 'Materias a cargo', render: (f) => f.materias },
+          { header: 'Cursos', render: (f) => f.cursos },
+        ]} />
+      </DataState>
+    </Card>
+  );
+}
+
+// Cubre los listados por deporte; por deporte y nivel; y por deporte, nivel, horario y profesor.
+function AlumnosPorDeporte() {
+  const deportes = useData(() => api.admin.deportes());
+  const niveles = useData(() => api.niveles());
+  const profesores = useData(() => api.admin.profesores());
+  const [deporte, setDeporte] = useState('');
+  const [nivel, setNivel] = useState('');
+  const [profesor, setProfesor] = useState('');
+  const { data, loading, error, reload } = useData(() => api.admin.reporteAlumnosDeporte({
+    deporte_id: Number(deporte) || undefined, nivel_id: Number(nivel) || undefined, profesor_id: Number(profesor) || undefined,
+  }), [deporte, nivel, profesor]);
+  const filas = data ?? [];
+  return (
+    <Card title="Listado de alumnos por deporte" actions={<BotonPdf disabled={!filas.length} onClick={() => exportarPdf({
+      titulo: 'Alumnos por deporte, nivel, horario y profesor', columnas: ['Deporte', 'Nivel', 'Horario', 'Profesor', 'Alumno', 'Legajo', 'Curso'],
+      filas: filas.map((f) => [f.deporte, f.nivel, f.horario, f.profesor, f.alumno, f.legajo, f.curso]), archivo: 'alumnos-por-deporte',
+    })} />}>
+      <div className="inline-form">
+        <Opciones label="Deporte" value={deporte} onChange={setDeporte} opciones={deportes.data ?? []} />
+        <Opciones label="Nivel" value={nivel} onChange={setNivel} opciones={niveles.data ?? []} />
+        <Opciones label="Profesor a cargo" value={profesor} onChange={setProfesor} opciones={(profesores.data ?? []).map(nombreProfesor)} />
+      </div>
+      <DataState loading={loading} error={error} onRetry={reload}>
+        <Table rows={filas} rowKey={(f) => `${f.comision}-${f.deporte}-${f.legajo}`} empty="Sin alumnos inscriptos." columns={[
+          { header: 'Deporte', render: (f) => `${f.deporte} (${f.comision})` },
+          { header: 'Nivel', render: (f) => f.nivel },
+          { header: 'Horario', render: (f) => f.horario },
+          { header: 'Profesor', render: (f) => f.profesor },
+          { header: 'Alumno', render: (f) => `${f.alumno} (${f.legajo})` },
+          { header: 'Curso', render: (f) => f.curso },
+        ]} />
+      </DataState>
+    </Card>
   );
 }

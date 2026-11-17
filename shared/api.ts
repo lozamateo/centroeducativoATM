@@ -63,6 +63,13 @@ export function createApi(config: ApiConfig) {
     recorridos: () => get<T.Recorrido[]>('/recorridos'),
     enviarContacto: (data: Body) => post<T.MensajeOk>('/contacto', data),
     enviarSolicitud: (data: Body) => post<T.MensajeOk>('/solicitudes', data),
+    opiniones: () => get<T.Opinion[]>('/opiniones'),
+    enviarOpinion: (data: Body) => post<T.Opinion>('/opiniones', data),
+    empleos: () => get<T.BusquedaLaboral[]>('/empleos'),
+    postular: (data: Body) => post<T.MensajeOk>('/postulaciones', data),
+    recuperarPassword: (email: string) => post<T.MensajeOk & { codigo_demo?: string }>('/auth/recuperar', { email }),
+    restablecerPassword: (email: string, codigo: string, password: string) => post<T.MensajeOk>('/auth/restablecer', { email, codigo, password }),
+    cambiarPassword: (actual: string, nueva: string) => post<T.MensajeOk>('/auth/cambiar-password', { actual, nueva }),
     credencial: (token: string) => get<T.Credencial>(`/credencial/${encodeURIComponent(token)}`),
 
     // ----- Portal familia -----
@@ -78,14 +85,18 @@ export function createApi(config: ApiConfig) {
       bajaTransporte: (id: number, inscripcionId: number) => del(`/portal/familia/hijos/${id}/transporte/${inscripcionId}`),
       inscribirComedor: (id: number, data: Body) => post(`/portal/familia/hijos/${id}/comedor`, data),
       bajaComedor: (id: number, inscripcionId: number) => del(`/portal/familia/hijos/${id}/comedor/${inscripcionId}`),
-      cuotas: (id: number) => get<T.CuotasAlumno>(`/portal/familia/hijos/${id}/cuotas`),
-      pagarCuota: (id: number, periodo: string, metodo: T.MetodoPago) => post(`/portal/familia/hijos/${id}/cuotas`, { periodo, metodo }),
+      cuenta: (id: number, rango: { desde?: string; hasta?: string } = {}) =>
+        get<T.CuentaAlumno>(`/portal/familia/hijos/${id}/cuenta${qs(rango)}`),
+      pagar: (id: number, facturaId: number, data: Body) => post<T.PagoRegistrado>(`/portal/familia/hijos/${id}/facturas/${facturaId}/pagos`, data),
+      comprobante: (id: number, comprobanteId: number) => get<T.ComprobanteArchivo>(`/portal/familia/hijos/${id}/comprobantes/${comprobanteId}`),
+      factura: (facturaId: number) => get<T.Factura>(`/portal/familia/facturas/${facturaId}`),
+      correos: () => get<T.Notificacion[]>('/portal/familia/correos'),
     },
 
     // ----- Portales docente y alumno -----
     portalDocente: () => get<T.PortalDocente>('/portal/docente'),
     portalAlumno: () => get<T.DetalleAlumno>('/portal/alumno'),
-    cuotasAlumnoPropio: () => get<T.CuotasAlumno>('/portal/alumno/cuotas'),
+    cuentaAlumnoPropio: (rango: { desde?: string; hasta?: string } = {}) => get<T.CuentaAlumno>(`/portal/alumno/cuenta${qs(rango)}`),
 
     // ----- Enfermeria -----
     salud: {
@@ -147,10 +158,36 @@ export function createApi(config: ApiConfig) {
         get<T.InscripcionDeporte[]>(`/admin/inscripciones-deporte${qs(params)}`),
       detalleAlumno: (id: number) => get<T.DetalleAlumno>(`/admin/alumnos/${id}/detalle`),
       opcionesAlumno: (id: number) => get<T.OpcionesInscripcion>(`/admin/alumnos/${id}/opciones`),
-      cuotas: (params: { nivel_id?: number; solo_deudores?: boolean } = {}) =>
-        get<T.PanelCuotas>(`/admin/cuotas${qs({ nivel_id: params.nivel_id, solo_deudores: params.solo_deudores ? 1 : undefined })}`),
-      cuotasAlumno: (id: number) => get<T.CuotasAlumno>(`/admin/alumnos/${id}/cuotas`),
-      pagarCuota: (id: number, periodo: string, metodo: T.MetodoPago) => post(`/admin/alumnos/${id}/cuotas`, { periodo, metodo }),
+      cuentaAlumno: (id: number, rango: { desde?: string; hasta?: string } = {}) => get<T.CuentaAlumno>(`/admin/alumnos/${id}/cuenta${qs(rango)}`),
+      tarifas: () => get<T.Tarifas>('/admin/tarifas'),
+      actualizarTarifa: (tipo: 'general' | 'deporte' | 'recorrido', clave: string | number, importe: number) =>
+        put<T.Tarifas>(`/admin/tarifas/${tipo}/${clave}`, { importe }),
+      facturacion: (params: { periodo?: string; nivel_id?: number } = {}) => get<T.PanelFacturacion>(`/admin/facturacion${qs(params)}`),
+      generarFacturas: (periodo: string) => post<{ periodo: string; creadas: number }>('/admin/facturacion/generar', { periodo }),
+      factura: (id: number) => get<T.Factura>(`/admin/facturas/${id}`),
+      comprobante: (id: number) => get<T.ComprobanteArchivo>(`/admin/comprobantes/${id}`),
+      ingresos: (rango: { desde?: string; hasta?: string }) => get<T.ReporteIngresos>(`/admin/reportes/pagos/ingresos${qs(rango)}`),
+      pagosCompletos: (rango: { desde?: string; hasta?: string }) => get<T.ReportePagosEstado>(`/admin/reportes/pagos/completos${qs(rango)}`),
+      pagosIncompletos: (rango: { desde?: string; hasta?: string }) => get<T.ReportePagosEstado>(`/admin/reportes/pagos/incompletos${qs(rango)}`),
+      pagosDeportes: (params: { desde?: string; hasta?: string; deporte_id?: number; nivel_id?: number; profesor_id?: number }) =>
+        get<T.PagoServicioFila[]>(`/admin/reportes/pagos/deportes${qs(params)}`),
+      pagosTransporte: (params: { desde?: string; hasta?: string; recorrido_id?: number }) =>
+        get<T.PagoServicioFila[]>(`/admin/reportes/pagos/transporte${qs(params)}`),
+      notificaciones: (tipo?: string) => get<T.Notificacion[]>(`/admin/notificaciones${qs({ tipo })}`),
+      ejecutarTareas: (fecha: string) => post<T.ResultadoTareas>('/admin/notificaciones/ejecutar', { fecha }),
+      enviarRecordatorio: (periodo: string) => post('/admin/notificaciones/recordatorio', { periodo }),
+      enviarAvisoDeuda: (periodo: string) => post('/admin/notificaciones/deuda', { periodo }),
+      reportePorAlumno: (id: number) => get<T.ReportePorAlumno>(`/admin/reportes/por-alumno/${id}`),
+      reporteDocentes: (profesor_id?: number) => get<T.ReporteDocenteFila[]>(`/admin/reportes/docentes${qs({ profesor_id })}`),
+      reporteDocentesNivel: (nivel_id?: number) => get<T.ReporteDocenteNivelFila[]>(`/admin/reportes/docentes-nivel${qs({ nivel_id })}`),
+      reporteAlumnosMateria: (params: { materia_id?: number; curso_id?: number }) =>
+        get<T.ReporteAlumnoMateriaFila[]>(`/admin/reportes/alumnos-materia${qs(params)}`),
+      reporteAlumnosDeporte: (params: { deporte_id?: number; nivel_id?: number; profesor_id?: number }) =>
+        get<T.ReporteAlumnoDeporteFila[]>(`/admin/reportes/alumnos-deporte${qs(params)}`),
+      opiniones: () => get<T.Opinion[]>('/admin/opiniones'),
+      visibilidadOpinion: (id: number, visible: boolean) => put(`/admin/opiniones/${id}`, { visible }),
+      postulaciones: () => get<T.Postulacion[]>('/admin/postulaciones'),
+      estadoPostulacion: (id: number, estado: T.Postulacion['estado']) => put(`/admin/postulaciones/${id}/estado`, { estado }),
       comisionesAlumno: (alumnoId: number) => get<T.ComisionDisponible[]>(`/admin/alumnos/${alumnoId}/comisiones`),
       inscribirDeporte: (alumno_id: number, comision_id: number) => post('/admin/inscripciones-deporte', { alumno_id, comision_id }),
       bajaDeporte: (id: number) => del(`/admin/inscripciones-deporte/${id}`),
