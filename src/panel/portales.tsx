@@ -66,7 +66,11 @@ export function FamiliaHijo({ id }: { id: number }) {
         {detalle.data && (
           <>
             <PageHeader title={detalle.data.alumno} subtitle={`${detalle.data.nivel ?? ''} · ${detalle.data.curso ?? 'Sin matricula'}`} />
-            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} />
+            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} cuotas={{
+              modo: 'familia',
+              cargar: () => api.familia.cuotas(id),
+              pagar: (periodo, metodo) => api.familia.pagarCuota(id, periodo, metodo),
+            }} />
           </>
         )}
       </DataState>
@@ -81,7 +85,7 @@ export function AlumnoInicio() {
       {data && (
         <>
           <PageHeader title={`Hola, ${data.alumno.split(', ')[1] ?? data.alumno}`} subtitle={`${data.nivel ?? ''} · ${data.curso ?? 'Sin matricula'}`} />
-          <AlumnoVista alumno={data} />
+          <AlumnoVista alumno={data} cuotas={{ modo: 'lectura', cargar: () => api.cuotasAlumnoPropio() }} />
         </>
       )}
     </DataState>

@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import * as academico from '../services/academicoService.js';
 import * as contenido from '../services/contenidoService.js';
+import * as cuotas from '../services/cuotasService.js';
 import * as deportes from '../services/deportesService.js';
 import * as inscripciones from '../services/inscripcionService.js';
 import * as personas from '../services/personasService.js';
@@ -114,6 +115,13 @@ router.get('/inscripciones-deporte', async (req, res) =>
 );
 router.get('/alumnos/:id/detalle', async (req, res) => res.json(await portal.detalleAlumno(id(req))));
 router.get('/alumnos/:id/opciones', async (req, res) => res.json(await portal.opcionesInscripcion(id(req))));
+
+// ----- Cuotas -----
+router.get('/cuotas', async (req, res) =>
+  res.json(await cuotas.panelCuotas({ nivel_id: optionalId(req.query.nivel_id), solo_deudores: req.query.solo_deudores === '1' })),
+);
+router.get('/alumnos/:id/cuotas', async (req, res) => res.json(await cuotas.cuotasAlumno(id(req))));
+router.post('/alumnos/:id/cuotas', async (req, res) => res.status(201).json(await cuotas.pagarCuota(uid(req), id(req), body(req))));
 router.get('/alumnos/:id/comisiones', async (req, res) => res.json(await inscripciones.comisionesDisponibles(id(req))));
 router.post('/inscripciones-deporte', async (req, res) =>
   res.status(201).json(await inscripciones.inscribirDeporte(uid(req), toId(req.body.alumno_id, 'alumno_id'), req.body.comision_id)),

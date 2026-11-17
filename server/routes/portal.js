@@ -1,6 +1,7 @@
 // Portales de autogestion: familias (TUTOR), docentes (DOCENTE) y alumnos (ALUMNO).
 import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
+import * as cuotas from '../services/cuotasService.js';
 import * as inscripciones from '../services/inscripcionService.js';
 import * as portal from '../services/portalService.js';
 import { clean, toId } from '../validation.js';
@@ -49,6 +50,12 @@ familia.delete('/hijos/:alumnoId/comedor/:id', async (req, res) =>
   res.json(await inscripciones.bajaComedor(req.usuario.id, toId(req.params.id), req.alumnoId)),
 );
 
+// Cuotas mensuales: la familia ve el estado y registra el pago (simulado) de cada mes.
+familia.get('/hijos/:alumnoId/cuotas', async (req, res) => res.json(await cuotas.cuotasAlumno(req.alumnoId)));
+familia.post('/hijos/:alumnoId/cuotas', async (req, res) =>
+  res.status(201).json(await cuotas.pagarCuota(req.usuario.id, req.alumnoId, clean(req.body))),
+);
+
 router.use('/familia', familia);
 
 // ----- Docentes -----
@@ -56,5 +63,8 @@ router.get('/docente', requireRole('DOCENTE'), async (req, res) => res.json(awai
 
 // ----- Alumnos -----
 router.get('/alumno', requireRole('ALUMNO'), async (req, res) => res.json(await portal.alumnoPropio(req.usuario.id)));
+router.get('/alumno/cuotas', requireRole('ALUMNO'), async (req, res) =>
+  res.json(await cuotas.cuotasAlumno((await portal.alumnoPropio(req.usuario.id)).alumno_id)),
+);
 
 export default router;

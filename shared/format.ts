@@ -52,3 +52,17 @@ export const tonoApto: Record<EstadoApto, 'success' | 'danger' | 'warning'> = {
 
 // URL que codifica el QR de la credencial deportiva.
 export const urlCredencial = (siteUrl: string, token: string) => `${siteUrl.replace(/\/$/, '')}/credencial/${token}`;
+
+// Importes en pesos argentinos, por ejemplo $ 40.000.
+export const pesos = (valor: number) => `$ ${valor.toLocaleString('es-AR')}`;
+
+export const mesCorto = (periodo: string) => {
+  const nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const [anio, mes] = periodo.split('-');
+  return `${nombres[Number(mes) - 1]} ${anio.slice(2)}`;
+};
+
+export const tonoCuota = { Pagada: 'success', 'En término': 'info', Vencida: 'danger', 'Próxima': 'neutral' } as const;
+
+// Datos bancarios de ejemplo: el pago es una simulación para el trabajo práctico.
+export const DATOS_TRANSFERENCIA = { alias: 'EDUCAR.TRANSFORMAR.CUOTAS', cbu: '0000003100099999999999', titular: 'Centro Educativo Educar para Transformar (ficticio)' };

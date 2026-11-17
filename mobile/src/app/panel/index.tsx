@@ -48,6 +48,7 @@ const menuAdmin: { ruta: string; label: string; icon: IconName }[] = [
   { ruta: '/panel/cursos', label: 'Cursos y materias', icon: 'book-outline' },
   { ruta: '/panel/deportes', label: 'Deportes', icon: 'football-outline' },
   { ruta: '/panel/inscripciones', label: 'Inscripciones', icon: 'clipboard-outline' },
+  { ruta: '/panel/cuotas', label: 'Cuotas', icon: 'wallet-outline' },
   { ruta: '/panel/reportes', label: 'Reportes', icon: 'bar-chart-outline' },
   { ruta: '/panel/salud', label: 'Aptos físicos', icon: 'medkit-outline' },
   { ruta: '/panel/usuarios', label: 'Usuarios', icon: 'shield-checkmark-outline' },
@@ -139,7 +140,7 @@ function AlumnoInicio() {
         {data && (
           <>
             <PageHeader title={`Hola, ${data.alumno.split(', ')[1] ?? data.alumno}`} subtitle={`${data.nivel ?? ''} · ${data.curso ?? 'Sin matrícula'}`} />
-            <AlumnoVista alumno={data} />
+            <AlumnoVista alumno={data} cuotas={{ modo: 'lectura', cargar: () => api.cuotasAlumnoPropio() }} />
           </>
         )}
       </DataState>

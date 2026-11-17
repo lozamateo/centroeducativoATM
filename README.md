@@ -40,6 +40,8 @@ server/
 supabase/
   schema.sql            esquema completo + datos de prueba (instalación nueva)
   002_tildes.sql        actualización para bases creadas con la primera versión
+  003_datos_demo.sql    datos de demostración para la presentación
+  004_cuotas.sql        cuotas mensuales y pagos (simulados) con datos de ejemplo
 shared/                 código común a la web y la app
 src/                    web: sitio público, login, panel por rol
 mobile/                 app móvil (Expo)
@@ -52,6 +54,8 @@ api/index.js            entrada de la API en Vercel
 2. Pegá todo `supabase/schema.sql` y tocá **Run**. Debe responder "Éxito".
 3. Si la base ya se había creado con la primera versión del esquema, ejecutá también `supabase/002_tildes.sql` (corrige
    textos y mensajes; se puede correr más de una vez).
+4. Para el módulo de cuotas, ejecutá `supabase/004_cuotas.sql` (crea la tabla `pagos_cuotas` y carga pagos de ejemplo;
+   se puede correr más de una vez).
 
 El esquema crea las tablas de los cuatro dominios del plan (Personas y Seguridad, Estructura Académica, Actividades
 Deportivas, Servicios y Salud), las reglas de negocio como *triggers*, las vistas para los reportes, la tabla de auditoría
@@ -125,6 +129,7 @@ enfermería lo renueve.
 | RF-14 y RF-15 Autogestión de familias y docentes | Portal de familias, portal docente y portal del alumno |
 | RF-16 a RF-21 Reportes MIS | Tablero, padrón por curso, padrón de transporte, ocupación de deportes, comedor, ficha 360 (PDF) |
 | RF-22 Ficha médica, apto físico y credencial QR | Enfermería; credencial QR en el portal; verificación pública en `/credencial/:token` |
+| Cuotas mensuales (pago simulado) | Pestaña **Cuotas** del alumno (familia paga, secretaría registra, alumno consulta); menú **Cuotas** del administrador |
 
 ## Reglas de negocio
 
@@ -137,6 +142,10 @@ inscripciones simultáneas:
 - **Una matrícula** por alumno y ciclo lectivo, con control de vacantes; al matricular se asignan las materias del curso.
 - Una inscripción activa al comedor por ciclo.
 - Cada alta, modificación o baja queda en la **auditoría** con usuario y fecha.
+- **Cuotas**: $ 40.000 por mes; si el grupo familiar tiene **2 o más hijos** en el colegio, $ 30.000 por cada hijo. Cada cuota
+  se paga del **1 al 15** del mes (después figura como vencida); no se pueden adelantar meses futuros ni pagar dos veces la
+  misma cuota. Formas de pago: **Efectivo** o **Transferencia**. Es una **simulación** para el trabajo práctico: no hay
+  pasarela de pago ni movimiento de dinero real. La lógica está en `server/rules/cuotas.js` (con pruebas unitarias).
 
 ## Endpoints principales
 
@@ -145,13 +154,13 @@ POST /api/auth/login                      GET  /api/auth/me
 GET  /api/niveles | noticias | deportes | recorridos
 POST /api/contacto | solicitudes          GET  /api/credencial/:token
 
-/api/portal/familia/hijos[/:id[/opciones|/matricula|/deportes|/transporte|/comedor]]   (rol TUTOR)
+/api/portal/familia/hijos[/:id[/opciones|/matricula|/deportes|/transporte|/comedor|/cuotas]] (rol TUTOR)
 /api/portal/docente                                                                      (rol DOCENTE)
-/api/portal/alumno                                                                       (rol ALUMNO)
+/api/portal/alumno[/cuotas]                                                              (rol ALUMNO)
 /api/salud/fichas[/:alumnoId]                                                            (rol ENFERMERIA)
 /api/admin/{alumnos,tutores,profesores,cursos,materias,deportes,comisiones,
             matriculas,inscripciones-deporte,transporte,comedor,usuarios,
-            noticias,mensajes,solicitudes,reportes/*}                                    (rol ADMIN)
+            noticias,mensajes,solicitudes,reportes/*,cuotas,alumnos/:id/cuotas}          (rol ADMIN)
 ```
 
 ## Validación

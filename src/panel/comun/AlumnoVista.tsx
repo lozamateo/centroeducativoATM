@@ -8,6 +8,8 @@ import type { DetalleAlumno, ModalidadComedor, OpcionesInscripcion } from '../..
 import { QrCode } from '../../components/QrCode';
 import { Badge, Button, Card, Empty, Feedback, Field, InfoRow, Input, Select, Tabs, Textarea } from '../../components/ui';
 import { useAction } from '../../lib/useData';
+import { CuotasAlumnoVista } from './Cuotas';
+import type { CuotasConfig } from './Cuotas';
 
 export interface AccionesFamilia {
   opciones: OpcionesInscripcion | null;
@@ -20,7 +22,7 @@ export interface AccionesFamilia {
   bajaComedor: (inscripcionId: number) => Promise<unknown>;
 }
 
-type TabKey = 'resumen' | 'academico' | 'deportes' | 'servicios' | 'salud';
+type TabKey = 'resumen' | 'academico' | 'deportes' | 'servicios' | 'salud' | 'cuotas';
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: 'resumen', label: 'Resumen' },
@@ -30,7 +32,7 @@ const tabs: { key: TabKey; label: string }[] = [
   { key: 'salud', label: 'Salud y credencial' },
 ];
 
-export function AlumnoVista({ alumno, acciones, onCambio }: { alumno: DetalleAlumno; acciones?: AccionesFamilia; onCambio?: () => void }) {
+export function AlumnoVista({ alumno, acciones, onCambio, cuotas }: { alumno: DetalleAlumno; acciones?: AccionesFamilia; onCambio?: () => void; cuotas?: CuotasConfig }) {
   const [tab, setTab] = useState<TabKey>('resumen');
   const accion = useAction();
 
@@ -41,13 +43,14 @@ export function AlumnoVista({ alumno, acciones, onCambio }: { alumno: DetalleAlu
 
   return (
     <div className="stack">
-      <Tabs tabs={tabs} active={tab} onChange={(key) => { setTab(key); accion.setMessage(null); }} />
+      <Tabs tabs={cuotas ? [...tabs, { key: 'cuotas', label: 'Cuotas' }] : tabs} active={tab} onChange={(key) => { setTab(key); accion.setMessage(null); }} />
       <Feedback message={accion.message} onClose={() => accion.setMessage(null)} />
       {tab === 'resumen' && <Resumen alumno={alumno} />}
       {tab === 'academico' && <Academico alumno={alumno} acciones={acciones} ejecutar={ejecutar} busy={accion.busy} />}
       {tab === 'deportes' && <Deportes alumno={alumno} acciones={acciones} ejecutar={ejecutar} busy={accion.busy} />}
       {tab === 'servicios' && <Servicios alumno={alumno} acciones={acciones} ejecutar={ejecutar} busy={accion.busy} />}
       {tab === 'salud' && <Salud alumno={alumno} />}
+      {tab === 'cuotas' && cuotas && <CuotasAlumnoVista key={alumno.alumno_id} config={cuotas} />}
     </div>
   );
 }

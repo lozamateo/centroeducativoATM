@@ -78,11 +78,14 @@ export function createApi(config: ApiConfig) {
       bajaTransporte: (id: number, inscripcionId: number) => del(`/portal/familia/hijos/${id}/transporte/${inscripcionId}`),
       inscribirComedor: (id: number, data: Body) => post(`/portal/familia/hijos/${id}/comedor`, data),
       bajaComedor: (id: number, inscripcionId: number) => del(`/portal/familia/hijos/${id}/comedor/${inscripcionId}`),
+      cuotas: (id: number) => get<T.CuotasAlumno>(`/portal/familia/hijos/${id}/cuotas`),
+      pagarCuota: (id: number, periodo: string, metodo: T.MetodoPago) => post(`/portal/familia/hijos/${id}/cuotas`, { periodo, metodo }),
     },
 
     // ----- Portales docente y alumno -----
     portalDocente: () => get<T.PortalDocente>('/portal/docente'),
     portalAlumno: () => get<T.DetalleAlumno>('/portal/alumno'),
+    cuotasAlumnoPropio: () => get<T.CuotasAlumno>('/portal/alumno/cuotas'),
 
     // ----- Enfermeria -----
     salud: {
@@ -144,6 +147,10 @@ export function createApi(config: ApiConfig) {
         get<T.InscripcionDeporte[]>(`/admin/inscripciones-deporte${qs(params)}`),
       detalleAlumno: (id: number) => get<T.DetalleAlumno>(`/admin/alumnos/${id}/detalle`),
       opcionesAlumno: (id: number) => get<T.OpcionesInscripcion>(`/admin/alumnos/${id}/opciones`),
+      cuotas: (params: { nivel_id?: number; solo_deudores?: boolean } = {}) =>
+        get<T.PanelCuotas>(`/admin/cuotas${qs({ nivel_id: params.nivel_id, solo_deudores: params.solo_deudores ? 1 : undefined })}`),
+      cuotasAlumno: (id: number) => get<T.CuotasAlumno>(`/admin/alumnos/${id}/cuotas`),
+      pagarCuota: (id: number, periodo: string, metodo: T.MetodoPago) => post(`/admin/alumnos/${id}/cuotas`, { periodo, metodo }),
       comisionesAlumno: (alumnoId: number) => get<T.ComisionDisponible[]>(`/admin/alumnos/${alumnoId}/comisiones`),
       inscribirDeporte: (alumno_id: number, comision_id: number) => post('/admin/inscripciones-deporte', { alumno_id, comision_id }),
       bajaDeporte: (id: number) => del(`/admin/inscripciones-deporte/${id}`),

@@ -448,3 +448,49 @@ export interface Solicitud {
 export interface MensajeOk {
   mensaje: string;
 }
+
+// ----- Cuotas (pago simulado, trabajo académico) -----
+
+export type EstadoCuota = 'Pagada' | 'En término' | 'Vencida' | 'Próxima';
+export type MetodoPago = 'Efectivo' | 'Transferencia';
+
+export interface Cuota {
+  periodo: string;
+  mes: string;
+  vence: string;
+  importe: number;
+  estado: EstadoCuota;
+  se_puede_pagar: boolean;
+  pago: { id: number; metodo: MetodoPago; fecha: string; comprobante: string; registrado_por: string | null } | null;
+}
+
+export interface CuotasAlumno {
+  alumno_id: number;
+  alumno: string;
+  hijos_en_el_colegio: number;
+  importe_mensual: number;
+  descuento_hermanos: boolean;
+  adeuda_desde: string | null;
+  cuotas_vencidas: number;
+  total_adeudado: number;
+  pagadas: number;
+  cuotas: Cuota[];
+}
+
+export interface PanelCuotas {
+  hoy: string;
+  periodos: { periodo: string; mes: string }[];
+  resumen: { alumnos: number; al_dia: number; con_deuda: number; total_adeudado: number; cobrado_mes_actual: number; cobrado_total: number };
+  filas: {
+    alumno_id: number;
+    alumno: string;
+    dni: string;
+    nivel: string | null;
+    curso: string | null;
+    importe_mensual: number;
+    adeuda_desde: string | null;
+    cuotas_vencidas: number;
+    total_adeudado: number;
+    meses: { periodo: string; estado: EstadoCuota }[];
+  }[];
+}

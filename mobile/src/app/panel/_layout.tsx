@@ -32,6 +32,7 @@ export default function PanelLayout() {
       <Stack.Screen name="cursos" options={{ title: 'Cursos y materias' }} />
       <Stack.Screen name="deportes" options={{ title: 'Deportes' }} />
       <Stack.Screen name="inscripciones" options={{ title: 'Inscripciones' }} />
+      <Stack.Screen name="cuotas" options={{ title: 'Cuotas' }} />
       <Stack.Screen name="reportes" options={{ title: 'Reportes' }} />
       <Stack.Screen name="salud" options={{ title: 'Aptos físicos' }} />
       <Stack.Screen name="usuarios" options={{ title: 'Usuarios' }} />

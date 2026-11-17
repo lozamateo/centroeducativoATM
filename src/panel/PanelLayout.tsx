@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   BarChart3, BookOpen, ClipboardList, Dumbbell, FileClock, GraduationCap, HeartPulse, Home, LayoutDashboard, LogOut,
-  Menu, Newspaper, ShieldCheck, UserCog, Users, X,
+  Menu, Newspaper, ShieldCheck, UserCog, Users, Wallet, X,
 } from 'lucide-react';
 import { ROLES } from '../../shared/format';
 import type { Rol } from '../../shared/types';
@@ -25,6 +25,7 @@ export const navPorRol: Record<Rol, NavItem[]> = {
     { href: '/panel/cursos', label: 'Cursos y materias', icon: <BookOpen size={18} /> },
     { href: '/panel/deportes', label: 'Deportes', icon: <Dumbbell size={18} /> },
     { href: '/panel/inscripciones', label: 'Inscripciones', icon: <ClipboardList size={18} /> },
+    { href: '/panel/cuotas', label: 'Cuotas', icon: <Wallet size={18} /> },
     { href: '/panel/reportes', label: 'Reportes', icon: <BarChart3 size={18} /> },
     { href: '/panel/salud', label: 'Aptos físicos', icon: <HeartPulse size={18} /> },
     { href: '/panel/usuarios', label: 'Usuarios', icon: <ShieldCheck size={18} /> },
