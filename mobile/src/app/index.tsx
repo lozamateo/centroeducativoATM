@@ -195,7 +195,7 @@ function Opiniones() {
     <View style={[s.section, s.soft]}>
       <Text style={s.eyebrow}>OPINIONES</Text>
       <Text style={s.sectionTitle}>Lo que dice nuestra comunidad</Text>
-      {(data ?? []).slice(0, 4).map((o) => (
+      {(Array.isArray(data) ? data : []).slice(0, 4).map((o) => (
         <Card key={o.id}>
           <Text style={s.estrellas}>{'★'.repeat(o.puntaje)}{'☆'.repeat(5 - o.puntaje)}</Text>
           <Text style={{ color: colors.text }}>{o.comentario}</Text>
@@ -231,13 +231,14 @@ function Empleo() {
   const [busqueda, setBusqueda] = useState<number | null>(null);
   const [form, setForm] = useState({ nombre: '', email: '', telefono: '', mensaje: '' });
   const accion = useAction();
-  const puesto = data?.find((b) => b.id === busqueda)?.puesto;
+  const busquedas = Array.isArray(data) ? data : [];
+  const puesto = busquedas.find((b) => b.id === busqueda)?.puesto;
   return (
     <View style={s.section}>
       <Text style={s.eyebrow}>EMPLEO</Text>
       <Text style={s.sectionTitle}>Sumate a nuestro equipo</Text>
-      <Row>{(data ?? []).map((b) => <Chip key={b.id} label={b.puesto} active={busqueda === b.id} onPress={() => setBusqueda(b.id)} />)}</Row>
-      {(data ?? []).filter((b) => b.id === busqueda).map((b) => <Text key={b.id} style={styles.muted}>{b.area} · {b.modalidad}. {b.descripcion}</Text>)}
+      <Row>{busquedas.map((b) => <Chip key={b.id} label={b.puesto} active={busqueda === b.id} onPress={() => setBusqueda(b.id)} />)}</Row>
+      {busquedas.filter((b) => b.id === busqueda).map((b) => <Text key={b.id} style={styles.muted}>{b.area} · {b.modalidad}. {b.descripcion}</Text>)}
       {busqueda && (
         <Card title={`Postularme: ${puesto}`}>
           {accion.message && <Alert tipo={accion.message.tipo} onClose={() => accion.setMessage(null)}>{accion.message.texto}</Alert>}

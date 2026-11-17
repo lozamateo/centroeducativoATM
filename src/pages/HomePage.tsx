@@ -480,6 +480,9 @@ function Galeria() {
   );
 }
 
+// Si la API no responde una lista (por ejemplo, sin conexión), la sección queda vacía en lugar de romper la página.
+const lista = <T,>(datos: T[] | null | undefined): T[] => (Array.isArray(datos) ? datos : []);
+
 const estrellas = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
 
 // Cualquier visitante puede dejar su opinión sin iniciar sesión.
@@ -502,7 +505,7 @@ function Opiniones() {
         <SectionHeader eyebrow="Opiniones" title="Lo que dice nuestra comunidad" text="Dejanos tu opinión: no hace falta registrarse." />
         <div className="grid grid-2">
           <div className="stack">
-            {(data ?? []).slice(0, 6).map((o) => (
+            {lista(data).slice(0, 6).map((o) => (
               <article key={o.id} className="card opinion">
                 <span className="estrellas" aria-label={`${o.puntaje} de 5 estrellas`}>{estrellas(o.puntaje)}</span>
                 <p>{o.comentario}</p>
@@ -545,7 +548,7 @@ function Empleo() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const puesto = data?.find((b) => b.id === Number(form.busqueda_id))?.puesto ?? form.puesto;
+    const puesto = lista(data).find((b) => b.id === Number(form.busqueda_id))?.puesto ?? form.puesto;
     if (await run(() => api.postular({ ...form, puesto }), 'Recibimos tu postulación. ¡Gracias!')) {
       setForm({ busqueda_id: '', puesto: '', nombre: '', email: '', telefono: '', cv_url: '', mensaje: '' });
     }
@@ -559,7 +562,7 @@ function Empleo() {
           <h2>Sumate a nuestro equipo</h2>
           <p>Buscamos docentes, profesionales y personal de apoyo comprometidos con la educación.</p>
           <ul className="route-list">
-            {(data ?? []).map((b) => (
+            {lista(data).map((b) => (
               <li key={b.id}><strong><Briefcase size={16} /> {b.puesto}</strong><span>{b.area} · {b.modalidad}. {b.descripcion}</span></li>
             ))}
           </ul>
@@ -570,7 +573,7 @@ function Empleo() {
             <Field label="Búsqueda" full>
               <Select value={form.busqueda_id} onChange={set('busqueda_id')}>
                 <option value="">Postulación espontánea</option>
-                {(data ?? []).map((b) => <option key={b.id} value={b.id}>{b.puesto}</option>)}
+                {lista(data).map((b) => <option key={b.id} value={b.id}>{b.puesto}</option>)}
               </Select>
             </Field>
             {!form.busqueda_id && <Field label="Puesto de interés" full><Input required value={form.puesto} onChange={set('puesto')} /></Field>}
