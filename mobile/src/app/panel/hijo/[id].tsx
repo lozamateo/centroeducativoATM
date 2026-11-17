@@ -30,10 +30,9 @@ export default function Hijo() {
         {detalle.data && (
           <>
             <PageHeader title={detalle.data.alumno} subtitle={`${detalle.data.nivel ?? ''} · ${detalle.data.curso ?? 'Sin matrícula'}`} />
-            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} cuotas={{
-              modo: 'familia',
-              cargar: () => api.familia.cuotas(id),
-              pagar: (periodo, metodo) => api.familia.pagarCuota(id, periodo, metodo),
+            <AlumnoVista alumno={detalle.data} acciones={acciones} onCambio={recargar} pagos={{
+              cargar: (rango) => api.familia.cuenta(id, rango),
+              pagar: (facturaId, body) => api.familia.pagar(id, facturaId, body),
             }} />
           </>
         )}

@@ -55,6 +55,7 @@ export default function Login() {
             <Input value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" textContentType="password" onSubmitEditing={submit} />
           </Field>
           <Button title="Ingresar" icon="log-in-outline" loading={busy} disabled={!email || !password} onPress={submit} />
+          <Button title="¿Olvidaste tu contraseña?" variant="ghost" small onPress={() => router.push({ pathname: '/recuperar', params: { email } })} />
           <View style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 12, gap: 8 }}>
             <Text style={styles.small}>USUARIOS DE DEMOSTRACIÓN</Text>
             <Row>

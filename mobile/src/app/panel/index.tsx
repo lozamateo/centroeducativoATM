@@ -28,14 +28,18 @@ export default function PanelInicio() {
 
 function Saludo() {
   const { usuario } = useAuth();
+  const router = useRouter();
   if (!usuario) return null;
   return (
     <View style={s.user}>
       <View style={s.avatar}><Text style={s.avatarText}>{usuario.nombre[0]}{usuario.apellido[0]}</Text></View>
-      <View>
+      <View style={{ flex: 1 }}>
         <Text style={s.userName}>{usuario.nombre} {usuario.apellido}</Text>
         <Text style={styles.small}>{ROLES[usuario.rol]}</Text>
       </View>
+      <Pressable onPress={() => router.push('/panel/clave')} hitSlop={10} accessibilityRole="button" accessibilityLabel="Cambiar contraseña">
+        <Ionicons name="key-outline" size={22} color={colors.primary} />
+      </Pressable>
     </View>
   );
 }
@@ -48,7 +52,7 @@ const menuAdmin: { ruta: string; label: string; icon: IconName }[] = [
   { ruta: '/panel/cursos', label: 'Cursos y materias', icon: 'book-outline' },
   { ruta: '/panel/deportes', label: 'Deportes', icon: 'football-outline' },
   { ruta: '/panel/inscripciones', label: 'Inscripciones', icon: 'clipboard-outline' },
-  { ruta: '/panel/cuotas', label: 'Cuotas', icon: 'wallet-outline' },
+  { ruta: '/panel/pagos', label: 'Pagos', icon: 'wallet-outline' },
   { ruta: '/panel/reportes', label: 'Reportes', icon: 'bar-chart-outline' },
   { ruta: '/panel/salud', label: 'Aptos físicos', icon: 'medkit-outline' },
   { ruta: '/panel/usuarios', label: 'Usuarios', icon: 'shield-checkmark-outline' },
@@ -106,7 +110,8 @@ function FamiliaInicio() {
   return (
     <Screen>
       <Saludo />
-      <PageHeader title="Mis hijos" subtitle="Gestioná la matrícula, deportes, transporte y comedor de cada alumno." />
+      <PageHeader title="Mis hijos" subtitle="Gestioná la matrícula, deportes, transporte, comedor y pagos de cada alumno." />
+      <ListItem title="Correos recibidos" subtitle="Recordatorios de pago y avisos de deuda" icon="mail-outline" onPress={() => router.push('/panel/correos')} />
       <DataState loading={loading} error={error} onRetry={reload}>
         {data?.length ? (
           data.map((hijo) => (
@@ -140,7 +145,7 @@ function AlumnoInicio() {
         {data && (
           <>
             <PageHeader title={`Hola, ${data.alumno.split(', ')[1] ?? data.alumno}`} subtitle={`${data.nivel ?? ''} · ${data.curso ?? 'Sin matrícula'}`} />
-            <AlumnoVista alumno={data} cuotas={{ modo: 'lectura', cargar: () => api.cuotasAlumnoPropio() }} />
+            <AlumnoVista alumno={data} pagos={{ cargar: (rango) => api.cuentaAlumnoPropio(rango) }} />
           </>
         )}
       </DataState>

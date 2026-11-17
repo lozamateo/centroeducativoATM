@@ -1,23 +1,25 @@
 // Inicio publico: misma informacion institucional que el sitio web.
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { fecha, hora, horarios } from '../../../shared/format';
+import { CONTACTO, fecha, hora, horarios } from '../../../shared/format';
 import { colors, institucion, radius } from '../../../shared/theme';
 import type { Comision } from '../../../shared/types';
 import { Logo } from '../components/Logo';
-import { Button, Card, Row, styles } from '../components/ui';
+import { Alert, Button, Card, Chip, Field, Input, Row, Select, styles } from '../components/ui';
 import type { IconName } from '../components/ui';
-import { api } from '../lib/api';
+import { SITE_URL, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { useData } from '../lib/useData';
+import { useAction, useData } from '../lib/useData';
 
 const pilares: { icon: IconName; titulo: string; texto: string }[] = [
   { icon: 'time-outline', titulo: 'Jornada extendida', texto: 'Más tiempo de aprendizaje, talleres y acompañamiento dentro de la escuela.' },
-  { icon: 'globe-outline', titulo: 'Formación plurilingüe', texto: 'Inglés desde el Nivel Inicial y Portugués desde el Primario.' },
-  { icon: 'trophy-outline', titulo: 'Deporte propio', texto: 'Seis disciplinas con profesores del centro y control de apto físico.' },
-  { icon: 'medkit-outline', titulo: 'Bienestar integral', texto: 'Enfermería, comedor y transporte para toda la jornada.' },
+  { icon: 'globe-outline', titulo: 'Formación plurilingüe', texto: 'Inglés desde el Nivel Inicial; Portugués y Francés desde el Primario.' },
+  { icon: 'trophy-outline', titulo: 'Deporte propio', texto: 'Pileta, canchas, pista de atletismo y gimnasio cubierto, con profesores del centro.' },
+  { icon: 'medkit-outline', titulo: 'Bienestar integral', texto: 'Apoyo estudiantil, enfermería, comedor y transporte para toda la jornada.' },
 ];
 
 export default function Inicio() {
@@ -49,15 +51,17 @@ export default function Inicio() {
             <Button title="Contacto" variant="outline" icon="mail-outline" onPress={() => router.push('/contacto')} />
           </View>
           <Row style={{ marginTop: 18, gap: 22 }}>
-            {[['3', 'niveles'], ['2', 'idiomas'], ['6', 'deportes']].map(([n, t]) => (
+            {[['3', 'niveles'], ['3', 'idiomas'], ['9', 'deportes']].map(([n, t]) => (
               <View key={t}><Text style={s.heroStat}>{n}</Text><Text style={s.heroStatLabel}>{t}</Text></View>
             ))}
           </Row>
         </View>
 
         <View style={s.section}>
-          <Text style={s.eyebrow}>NUESTRA PROPUESTA</Text>
+          <Text style={s.eyebrow}>QUIÉNES SOMOS</Text>
           <Text style={s.sectionTitle}>Una escuela pensada para transformar</Text>
+          <Text style={styles.muted}>Institución de gestión privada de alta calidad educativa, en las afueras de Resistencia. Inicia sus actividades en marzo de 2027.</Text>
+          <Text style={s.mision}>Inspiramos, desafiamos y empoderamos a todos nuestros alumnos a ser miembros comprometidos y éticos de una comunidad global, para que se conviertan en agentes de cambio conscientes de sí mismos, seguros, innovadores y colaborativos.</Text>
           {pilares.map((p) => (
             <Card key={p.titulo}>
               <Row style={{ flexWrap: 'nowrap', alignItems: 'flex-start', gap: 12 }}>
@@ -93,8 +97,10 @@ export default function Inicio() {
         </View>
 
         <View style={s.section}>
-          <Text style={s.eyebrow}>SERVICIOS</Text>
+          <Text style={s.eyebrow}>BIENESTAR ESTUDIANTIL</Text>
           <Text style={s.sectionTitle}>Acompañamos toda la jornada</Text>
+          <Card title="Apoyo estudiantil"><Text style={styles.muted}>Gabinete psicopedagógico, tutorías, clases de apoyo y orientación vocacional.</Text></Card>
+          <Card title="Laboratorios"><Text style={styles.muted}>Computación, física y química, equipados para el trabajo práctico.</Text></Card>
           <Card title="Transporte escolar">
             <Text style={styles.muted}>Cuatro recorridos oficiales con paradas fijas.</Text>
             {(recorridos.data ?? []).map((r) => (
@@ -123,6 +129,21 @@ export default function Inicio() {
           </View>
         )}
 
+        <Galeria />
+        <Opiniones />
+        <Empleo />
+
+        <View style={[s.section, s.soft]}>
+          <Text style={s.eyebrow}>CONTACTO</Text>
+          <Text style={s.sectionTitle}>Estamos para ayudarte</Text>
+          <Button title={`WhatsApp ${CONTACTO.whatsappTexto}`} icon="logo-whatsapp" style={{ backgroundColor: '#16a34a', borderColor: '#16a34a' }} onPress={() => Linking.openURL(`https://wa.me/${CONTACTO.whatsapp}`)} />
+          <Row>
+            <Button title="Instagram" variant="outline" icon="logo-instagram" small onPress={() => Linking.openURL(CONTACTO.instagram)} />
+            <Button title="Facebook" variant="outline" icon="logo-facebook" small onPress={() => Linking.openURL(CONTACTO.facebook)} />
+            <Button title="Formulario" variant="outline" icon="mail-outline" small onPress={() => router.push('/contacto')} />
+          </Row>
+        </View>
+
         <View style={[s.section, s.footer]}>
           <Text style={{ color: '#fff', fontWeight: '800', fontSize: 16 }}>{institucion.nombre}</Text>
           <Text style={s.footerText}><Ionicons name="location-outline" /> {institucion.direccion}</Text>
@@ -134,7 +155,111 @@ export default function Inicio() {
   );
 }
 
+const fotos = [
+  { archivo: 'edificio.jpg', titulo: 'Edificio principal' },
+  { archivo: 'pileta.svg', titulo: 'Pileta de natación' },
+  { archivo: 'cancha.svg', titulo: 'Canchas de fútbol' },
+  { archivo: 'gimnasio.svg', titulo: 'Gimnasio cubierto' },
+  { archivo: 'laboratorio.svg', titulo: 'Laboratorios' },
+  { archivo: 'comedor.svg', titulo: 'Comedor' },
+];
+
+// Las imágenes se toman del sitio web publicado (carpeta /galeria).
+function Galeria() {
+  return (
+    <View style={s.section}>
+      <Text style={s.eyebrow}>GALERÍA</Text>
+      <Text style={s.sectionTitle}>Conocé nuestras instalaciones</Text>
+      <Text style={styles.small}>Algunas imágenes son ilustraciones del proyecto.</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+        {fotos.map((f) => {
+          const uri = `${SITE_URL}/galeria/${f.archivo}`;
+          return (
+            <View key={f.archivo} style={s.foto}>
+              {f.archivo.endsWith('.svg') ? <SvgUri uri={uri} width={240} height={136} /> : <Image source={{ uri }} style={{ width: 240, height: 136 }} />}
+              <Text style={s.fotoTitulo}>{f.titulo}</Text>
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+// Cualquier visitante puede opinar sin iniciar sesión.
+function Opiniones() {
+  const { data, reload } = useData(() => api.opiniones());
+  const [form, setForm] = useState({ nombre: '', relacion: 'Familia', comentario: '', puntaje: 5 });
+  const accion = useAction();
+  return (
+    <View style={[s.section, s.soft]}>
+      <Text style={s.eyebrow}>OPINIONES</Text>
+      <Text style={s.sectionTitle}>Lo que dice nuestra comunidad</Text>
+      {(data ?? []).slice(0, 4).map((o) => (
+        <Card key={o.id}>
+          <Text style={s.estrellas}>{'★'.repeat(o.puntaje)}{'☆'.repeat(5 - o.puntaje)}</Text>
+          <Text style={{ color: colors.text }}>{o.comentario}</Text>
+          <Text style={styles.small}>{o.nombre} · {o.relacion}</Text>
+        </Card>
+      ))}
+      <Card title="Dejá tu opinión (sin registrarte)">
+        {accion.message && <Alert tipo={accion.message.tipo} onClose={() => accion.setMessage(null)}>{accion.message.texto}</Alert>}
+        <Field label="Nombre"><Input value={form.nombre} onChangeText={(nombre) => setForm({ ...form, nombre })} maxLength={80} /></Field>
+        <Field label="Soy">
+          <Select value={form.relacion} onChange={(relacion) => setForm({ ...form, relacion })} options={['Familia', 'Alumno', 'Ex alumno', 'Docente', 'Visitante'].map((r) => ({ value: r, label: r }))} />
+        </Field>
+        <Row>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <Pressable key={n} onPress={() => setForm({ ...form, puntaje: n })} accessibilityRole="radio" accessibilityLabel={`${n} estrellas`} accessibilityState={{ checked: form.puntaje === n }}>
+              <Ionicons name={n <= form.puntaje ? 'star' : 'star-outline'} size={30} color={colors.amber} />
+            </Pressable>
+          ))}
+        </Row>
+        <Field label="Tu opinión"><Input value={form.comentario} onChangeText={(comentario) => setForm({ ...form, comentario })} multiline maxLength={600} style={{ minHeight: 80 }} /></Field>
+        <Button title="Publicar opinión" loading={accion.busy} disabled={!form.nombre || form.comentario.length < 5} onPress={() => accion.run(async () => {
+          await api.enviarOpinion(form);
+          setForm({ nombre: '', relacion: 'Familia', comentario: '', puntaje: 5 });
+          reload();
+        }, '¡Gracias por tu opinión!')} />
+      </Card>
+    </View>
+  );
+}
+
+function Empleo() {
+  const { data } = useData(() => api.empleos());
+  const [busqueda, setBusqueda] = useState<number | null>(null);
+  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', mensaje: '' });
+  const accion = useAction();
+  const puesto = data?.find((b) => b.id === busqueda)?.puesto;
+  return (
+    <View style={s.section}>
+      <Text style={s.eyebrow}>EMPLEO</Text>
+      <Text style={s.sectionTitle}>Sumate a nuestro equipo</Text>
+      <Row>{(data ?? []).map((b) => <Chip key={b.id} label={b.puesto} active={busqueda === b.id} onPress={() => setBusqueda(b.id)} />)}</Row>
+      {(data ?? []).filter((b) => b.id === busqueda).map((b) => <Text key={b.id} style={styles.muted}>{b.area} · {b.modalidad}. {b.descripcion}</Text>)}
+      {busqueda && (
+        <Card title={`Postularme: ${puesto}`}>
+          {accion.message && <Alert tipo={accion.message.tipo} onClose={() => accion.setMessage(null)}>{accion.message.texto}</Alert>}
+          <Field label="Nombre y apellido"><Input value={form.nombre} onChangeText={(nombre) => setForm({ ...form, nombre })} /></Field>
+          <Field label="Email"><Input value={form.email} onChangeText={(email) => setForm({ ...form, email })} autoCapitalize="none" keyboardType="email-address" /></Field>
+          <Field label="Teléfono"><Input value={form.telefono} onChangeText={(telefono) => setForm({ ...form, telefono })} keyboardType="phone-pad" /></Field>
+          <Field label="Mensaje"><Input value={form.mensaje} onChangeText={(mensaje) => setForm({ ...form, mensaje })} multiline /></Field>
+          <Button title="Enviar postulación" icon="briefcase-outline" loading={accion.busy} disabled={!form.nombre || !form.email} onPress={() => accion.run(async () => {
+            await api.postular({ ...form, busqueda_id: busqueda, puesto });
+            setForm({ nombre: '', email: '', telefono: '', mensaje: '' });
+          }, 'Recibimos tu postulación. ¡Gracias!')} />
+        </Card>
+      )}
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
+  mision: { backgroundColor: colors.amberSoft, borderLeftWidth: 4, borderLeftColor: colors.amber, padding: 12, borderRadius: radius.md, fontStyle: 'italic', color: colors.textStrong },
+  foto: { width: 240, borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  fotoTitulo: { padding: 10, fontWeight: '700', color: colors.textStrong },
+  estrellas: { color: colors.amber, fontSize: 16, letterSpacing: 2 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface },
   hero: { backgroundColor: colors.primary, padding: 22, paddingVertical: 34, gap: 12 },
   heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,255,255,0.45)', backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6 },
